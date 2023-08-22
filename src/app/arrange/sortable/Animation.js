@@ -1,5 +1,5 @@
-import { getRect, css, matrix, isRectEqual, indexOfObject } from "./utils.js";
-import Sortable from "./Sortable.js";
+import { getRect, css, matrix, isRectEqual, indexOfObject } from "./utils";
+import Sortable from "./Sortable";
 import { calculateRealTime, repaint } from "./helpers/animation.js";
 
 export default class AnimationStateManager {
