@@ -15,7 +15,7 @@ declare global {
   }
 
   interface Element {
-    style: CSSStyleDeclaration & {
+    style: ICSSStyleDeclaration & {
       'will-change': string;
     };
   }

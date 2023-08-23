@@ -1,5 +1,10 @@
 import Sortable from './Sortable';
-import { IHTMLElement, SortableOptions, Void } from './types/index.js';
+import {
+  ICSSStyleDeclaration,
+  IHTMLElement,
+  SortableOptions,
+  Void,
+} from './types/index.js';
 
 const captureMode = {
   capture: false,
@@ -101,26 +106,29 @@ function toggleClass(el: IHTMLElement, name: string, state: boolean) {
 
 function css(
   el: IHTMLElement | Element,
-  prop?: string | number,
-  val?: CSSStyleDeclaration | string | number
+  prop?: keyof ICSSStyleDeclaration,
+  val?: ICSSStyleDeclaration | string | number
 ) {
   let style = el && el.style;
 
   if (style) {
     if (val === void 0) {
       if (document.defaultView && document.defaultView.getComputedStyle) {
-        val = document.defaultView.getComputedStyle(el, '');
+        val = document.defaultView.getComputedStyle(
+          el,
+          ''
+        ) as unknown as ICSSStyleDeclaration;
       } else if ((el as IHTMLElement).currentStyle) {
         val = (el as IHTMLElement).currentStyle;
       }
 
-      return prop === void 0 ? val : val?.[prop as number];
+      return prop === void 0 ? val : val?.[prop];
     } else {
       if (!(prop! in style) && (prop as string).indexOf('webkit') === -1) {
-        prop = '-webkit-' + prop;
+        prop = ('-webkit-' + prop) as keyof ICSSStyleDeclaration;
       }
 
-      style[prop as number] = val + (typeof val === 'string' ? '' : 'px');
+      style[prop!] = val + (typeof val === 'string' ? '' : 'px');
     }
   }
 
@@ -198,7 +206,7 @@ function getRect(
   relativeToNonStaticParent?: boolean[] | boolean,
   undoScale?: boolean[] | boolean,
   container?: IHTMLElement
-): Record<string, number> | undefined {
+): Partial<ICSSStyleDeclaration> | undefined {
   if (!el.getBoundingClientRect && el !== (window as unknown as IHTMLElement))
     return;
 
@@ -246,10 +254,20 @@ function getRect(
         // Set relative to edges of padding box of container
         top -=
           containerRect.top +
-          parseInt(css(container, 'border-top-width') as string);
+          parseInt(
+            css(
+              container,
+              'border-top-width' as keyof ICSSStyleDeclaration
+            ) as string
+          );
         left -=
           containerRect.left +
-          parseInt(css(container, 'border-left-width') as string);
+          parseInt(
+            css(
+              container,
+              'border-left-width' as keyof ICSSStyleDeclaration
+            ) as string
+          );
         bottom = top + elRect?.height!;
         right = left + elRect?.width!;
 
@@ -289,11 +307,12 @@ function getRect(
 
 function isScrolledPast(el: IHTMLElement, elSide: string, parentSide: string) {
   let parent = getParentAutoScrollElement(el, true) as IHTMLElement,
-    elSideVal = getRect(el)?.[elSide]!;
+    elSideVal = getRect(el)?.[elSide as keyof ICSSStyleDeclaration]!;
 
   /* jshint boss:true */
   while (parent) {
-    let parentSideVal = getRect(parent)?.[parentSide]!,
+    let parentSideVal =
+        getRect(parent)?.[parentSide as keyof ICSSStyleDeclaration]!,
       visible;
 
     if (parentSide === 'top' || parentSide === 'left') {
@@ -459,7 +478,7 @@ function getParentAutoScrollElement(el: IHTMLElement, includeSelf: boolean) {
       elem.clientWidth < elem.scrollWidth ||
       elem.clientHeight < elem.scrollHeight
     ) {
-      let elemCSS = css(elem) as CSSStyleDeclaration;
+      let elemCSS = css(elem) as ICSSStyleDeclaration;
       if (
         (elem.clientWidth < elem.scrollWidth &&
           (elemCSS.overflowX == 'auto' || elemCSS.overflowX == 'scroll')) ||
@@ -494,12 +513,15 @@ function extend(
   return dst;
 }
 
-function isRectEqual(rect1: CSSStyleDeclaration, rect2: CSSStyleDeclaration) {
+function isRectEqual(
+  rect1: Partial<ICSSStyleDeclaration>,
+  rect2: Partial<ICSSStyleDeclaration>
+) {
   return (
-    Math.round(+rect1.top) === Math.round(+rect2.top) &&
-    Math.round(+rect1.left) === Math.round(+rect2.left) &&
-    Math.round(+rect1.height) === Math.round(+rect2.height) &&
-    Math.round(+rect1.width) === Math.round(+rect2.width)
+    Math.round(+rect1.top!) === Math.round(+rect2.top!) &&
+    Math.round(+rect1.left!) === Math.round(+rect2.left!) &&
+    Math.round(+rect1.height!) === Math.round(+rect2.height!) &&
+    Math.round(+rect1.width!) === Math.round(+rect2.width!)
   );
 }
 
@@ -546,7 +568,7 @@ function clone(el: IHTMLElement) {
   }
 }
 
-function setRect(el: IHTMLElement, rect: CSSStyleDeclaration) {
+function setRect(el: IHTMLElement, rect: ICSSStyleDeclaration) {
   css(el, 'position', 'absolute');
   css(el, 'top', rect.top);
   css(el, 'left', rect.left);

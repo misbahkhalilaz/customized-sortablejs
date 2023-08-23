@@ -5,9 +5,9 @@
  * @license MIT
  */
 
-import { Edge, FireFox, Safari, IOS, ChromeForAndroid } from './BrowserInfo.js';
+import { Edge, FireFox, Safari, IOS, ChromeForAndroid } from './BrowserInfo';
 
-import AnimationStateManager from './Animation.js';
+import AnimationStateManager from './Animation';
 
 import {
   on,
@@ -52,7 +52,7 @@ import {
   nearestEmptyInsertDetectEvent,
   onMove,
 } from './helpers/sortable.js';
-import { IHTMLElement } from './types/override.js';
+import { ICSSStyleDeclaration, IHTMLElement } from './types/override.js';
 import {
   SortableGroup,
   SortableOptions,
@@ -164,6 +164,7 @@ class Sortable {
   _dragStartId: NodeJS.Timeout | undefined;
   lastPutMode: any;
   animateAll: ((arg?: Void) => void) | undefined;
+  forRepaintDummy?: number;
 
   constructor(
     el: IHTMLElement & Record<string, Sortable>,
@@ -441,8 +442,8 @@ class Sortable {
         clientY: (touch || evt).clientY,
       } as unknown as MouseEvent;
 
-      tapDistanceLeft = tapEvt.clientX - dragRect?.['left']!;
-      tapDistanceTop = tapEvt.clientY - dragRect?.['top']!;
+      tapDistanceLeft = tapEvt.clientX - +dragRect!.left!;
+      tapDistanceTop = tapEvt.clientY - +dragRect!.top!;
 
       _this._lastX = (touch || evt).clientX;
       _this._lastY = (touch || evt).clientY;
@@ -726,8 +727,8 @@ class Sortable {
         let cssMatrix = `matrix(${ghostMatrix.a},${ghostMatrix.b},${ghostMatrix.c},${ghostMatrix.d},${ghostMatrix.e},${ghostMatrix.f})`;
 
         css(ghostEl, 'webkitTransform', cssMatrix);
-        css(ghostEl, 'mozTransform', cssMatrix);
-        css(ghostEl, 'msTransform', cssMatrix);
+        css(ghostEl, 'mozTransform' as keyof ICSSStyleDeclaration, cssMatrix);
+        css(ghostEl, 'msTransform' as keyof ICSSStyleDeclaration, cssMatrix);
         css(ghostEl, 'transform', cssMatrix);
 
         lastDx = dx;
@@ -774,8 +775,8 @@ class Sortable {
           if (ghostRelativeParent === (document as unknown as IHTMLElement))
             ghostRelativeParent = getWindowScrollingElement() as IHTMLElement;
 
-          rect!['top'] += ghostRelativeParent.scrollTop;
-          rect!['left'] += ghostRelativeParent.scrollLeft;
+          rect!.top! += ghostRelativeParent.scrollTop;
+          rect!.left! += ghostRelativeParent.scrollLeft;
         } else {
           ghostRelativeParent = getWindowScrollingElement() as IHTMLElement;
         }
@@ -792,7 +793,7 @@ class Sortable {
       css(ghostEl, 'transition', '');
       css(ghostEl, 'transform', '');
 
-      css(ghostEl, 'box-sizing', 'border-box');
+      css(ghostEl, 'box-sizing' as keyof ICSSStyleDeclaration, 'border-box');
       css(ghostEl, 'margin', 0);
       css(ghostEl, 'top', rect?.['top']);
       css(ghostEl, 'left', rect?.['left']);
@@ -810,7 +811,7 @@ class Sortable {
       // Set transform-origin
       css(
         ghostEl,
-        'transform-origin',
+        'transform-origin' as keyof ICSSStyleDeclaration,
         (tapDistanceLeft / parseInt(ghostEl.style.width)) * 100 +
           '% ' +
           (tapDistanceTop / parseInt(ghostEl.style.height)) * 100 +
@@ -883,7 +884,7 @@ class Sortable {
     moved = true;
 
     if (Safari) {
-      css(document.body as IHTMLElement, 'user-select', 'none');
+      css(document.body as IHTMLElement, 'user-select' as keyof ICSSStyleDeclaration, 'none');
     }
   }
 
@@ -1132,7 +1133,7 @@ class Sortable {
             (target!.animated && target!.toRect) || targetRect,
             vertical
           ),
-          side1 = vertical ? 'top' : 'left',
+          side1 = (vertical ? 'top' : 'left') as keyof ICSSStyleDeclaration,
           scrolledPastTop =
             isScrolledPast(target as IHTMLElement, 'top', 'top') ||
             isScrolledPast(dragEl!, 'top', 'top'),
@@ -1234,7 +1235,7 @@ class Sortable {
           // must be done before animation
           if (targetBeforeFirstSwap !== undefined && !isCircumstantialInvert) {
             targetMoveDistance = Math.abs(
-              targetBeforeFirstSwap - getRect(target)?.[side1]!
+              +targetBeforeFirstSwap! - +getRect(target)?.[side1]!
             );
           }
           changed();
@@ -1324,7 +1325,7 @@ class Sortable {
     this._offUpEvents();
 
     if (Safari) {
-      css(document.body, 'user-select', '');
+      css(document.body, 'user-select' as keyof ICSSStyleDeclaration, '');
     }
 
     css(dragEl!, 'transform', '');
@@ -1610,7 +1611,12 @@ class Sortable {
       cloneHidden = false;
     }
   }
-  animate(dragEl: IHTMLElement | null, cloneEl: IHTMLElement | null) {
+  animate(
+    dragEl: IHTMLElement | null,
+    cloneEl: IHTMLElement | Partial<ICSSStyleDeclaration> | null,
+    toRect?: Partial<ICSSStyleDeclaration>,
+    time?: number
+  ) {
     throw new Error('Method not implemented.');
   }
 }

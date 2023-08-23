@@ -1,7 +1,7 @@
 import { IHTMLElement } from './override';
 import { Void } from './global';
 import Sortable from '../Sortable';
-import { closest, on } from '../utils';
+import { closest, on, css } from '../utils';
 
 export interface SortableOptions {
   preventOnFilter?: boolean;
@@ -65,11 +65,7 @@ export interface SortableGroup {
 export interface SortableUtils {
   on: typeof on;
   off: (el: IHTMLElement, event: string, fn: Void) => void;
-  css: (
-    el: IHTMLElement,
-    prop?: string | number | undefined,
-    val?: string | CSSStyleDeclaration | undefined
-  ) => string | CSSStyleDeclaration | undefined;
+  css: ReturnType<css>;
   find: (
     ctx: IHTMLElement,
     tagName: string,
