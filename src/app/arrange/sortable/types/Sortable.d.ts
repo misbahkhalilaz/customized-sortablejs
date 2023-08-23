@@ -47,19 +47,22 @@ export interface SortableOptions {
 }
 
 export interface SortableGroup {
-  revertClone: unknown;
-  checkPull: (
+  name?: string;
+  revertClone?: unknown;
+  checkPull?: (
     _this: Sortable,
     activeSortable: Sortable,
     dragEl: IHTMLElement,
     evt: Event
   ) => void;
-  checkPut: (
+  checkPut?: (
     _this: Sortable,
     activeSortable: Sortable,
     dragEl: IHTMLElement,
     evt: Event
   ) => void;
+  pull?: ToFnValueCB;
+  put?: ToFnValueCB;
 }
 
 export interface SortableUtils {
@@ -70,7 +73,7 @@ export interface SortableUtils {
     ctx: IHTMLElement,
     tagName: string,
     iterator: (el: Element, i: number) => void
-  ) => never[] | HTMLCollectionOf<Element>;
+  ) => unknown[] | HTMLCollectionOf<Element>;
   is: (el: IHTMLElement, selector: string) => boolean;
   extend: (
     dst: Record<string | number, unknown>,
@@ -94,3 +97,10 @@ export interface SortableUtils {
     includeDragEl: boolean
   ) => Element | null;
 }
+
+export type ToFnValueCB = (
+  to: Sortable,
+  from: Sortable,
+  dragEl: IHTMLElement,
+  evt: Event
+) => null;

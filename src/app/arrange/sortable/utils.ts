@@ -4,7 +4,7 @@ import {
   IHTMLElement,
   SortableOptions,
   Void,
-} from './types/index.js';
+} from './types/index';
 
 const captureMode = {
   capture: false,
@@ -109,7 +109,7 @@ function css(
   prop?: keyof ICSSStyleDeclaration,
   val?: ICSSStyleDeclaration | string | number
 ) {
-  let style = el && el.style;
+  let style = (el && el.style) as ICSSStyleDeclaration;
 
   if (style) {
     if (val === void 0) {
@@ -128,7 +128,7 @@ function css(
         prop = ('-webkit-' + prop) as keyof ICSSStyleDeclaration;
       }
 
-      style[prop!] = val + (typeof val === 'string' ? '' : 'px');
+      style[prop as number] = val + (typeof val === 'string' ? '' : 'px');
     }
   }
 
@@ -162,10 +162,10 @@ function matrix(el: IHTMLElement, selfOnly?: boolean) {
 function find(
   ctx: IHTMLElement,
   tagName: string,
-  iterator: (el: Element, i: number) => void
+  iterator: (el: IHTMLElement, i: number) => void
 ) {
   if (ctx) {
-    let list = ctx.getElementsByTagName(tagName),
+    let list = ctx.getElementsByTagName(tagName) as unknown as IHTMLElement[],
       i = 0,
       n = list.length;
 
@@ -343,7 +343,7 @@ function getChild(
   el: IHTMLElement,
   childNum: number,
   options: SortableOptions,
-  includeDragEl: boolean
+  includeDragEl?: boolean
 ) {
   let currentChild = 0,
     i = 0,
@@ -378,7 +378,7 @@ function getChild(
  * @param  {selector} selector    Any other elements that should be ignored
  * @return {IHTMLElement}          The last child, ignoring ghostEl
  */
-function lastChild(el: IHTMLElement, selector: string) {
+function lastChild(el: IHTMLElement, selector?: string) {
   let last = el.lastElementChild as IHTMLElement;
 
   while (

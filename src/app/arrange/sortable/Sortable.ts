@@ -51,14 +51,14 @@ import {
   checkCssPointerEventSupport,
   nearestEmptyInsertDetectEvent,
   onMove,
-} from './helpers/sortable.js';
-import { ICSSStyleDeclaration, IHTMLElement } from './types/override.js';
+} from './helpers/sortable';
+import { ICSSStyleDeclaration, IHTMLElement } from './types/override';
 import {
   SortableGroup,
   SortableOptions,
   SortableUtils,
-} from './types/Sortable.js';
-import { Void } from './types/global.js';
+} from './types/Sortable';
+import { Void } from './types/global';
 
 let dragEl: IHTMLElement | null,
   parentEl: IHTMLElement | null,
@@ -812,9 +812,9 @@ class Sortable {
       css(
         ghostEl,
         'transform-origin' as keyof ICSSStyleDeclaration,
-        (tapDistanceLeft / parseInt(ghostEl.style.width)) * 100 +
+        (tapDistanceLeft / parseInt(ghostEl.style.width.toString())) * 100 +
           '% ' +
-          (tapDistanceTop / parseInt(ghostEl.style.height)) * 100 +
+          (tapDistanceTop / parseInt(ghostEl.style.height.toString())) * 100 +
           '%'
       );
     }
@@ -884,7 +884,11 @@ class Sortable {
     moved = true;
 
     if (Safari) {
-      css(document.body as IHTMLElement, 'user-select' as keyof ICSSStyleDeclaration, 'none');
+      css(
+        document.body as IHTMLElement,
+        'user-select' as keyof ICSSStyleDeclaration,
+        'none'
+      );
     }
   }
 
@@ -1018,13 +1022,13 @@ class Sortable {
       (isOwner
         ? canSort || (revert = parentEl !== rootEl) // Reverting item into the original list
         : putSortable === this ||
-          ((this.lastPutMode = activeGroup?.checkPull(
+          ((this.lastPutMode = activeGroup?.checkPull?.(
             this,
             activeSortable,
             dragEl!,
             evt
           )) &&
-            group?.checkPut(this, activeSortable, dragEl!, evt)))
+            group?.checkPut?.(this, activeSortable, dragEl!, evt)))
     ) {
       vertical = this._getDirection(evt, target!) === 'vertical';
 

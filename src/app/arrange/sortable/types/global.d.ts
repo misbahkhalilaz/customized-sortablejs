@@ -1,5 +1,5 @@
 import { SortableOptions } from './Sortable';
-import { IHTMLElement } from './override';
+import { ICSSStyleDeclaration, IHTMLElement } from './override';
 
 declare global {
   var modifiedValue: SortableOptions[keyof SortableOptions] | undefined;
@@ -26,8 +26,20 @@ declare global {
     button?: number;
     dataTransfer: {
       effectAllowed: string;
+      dropEffect: string;
     };
     rootEl?: IHTMLElement;
+    to?: IHTMLElement;
+    from?: IHTMLElement;
+    dragged?: IHTMLElement;
+    draggedRect?: Partial<ICSSStyleDeclaration>;
+    related?: IHTMLElement;
+    relatedRect?: Partial<ICSSStyleDeclaration>;
+    willInsertAfter?: boolean;
+    originalEvent?: Event;
+    clientY?: number;
+    clientX?: number;
+    touches?: TouchList;
   }
 
   interface EventTarget {

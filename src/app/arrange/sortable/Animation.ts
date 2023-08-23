@@ -1,6 +1,6 @@
 import { getRect, css, matrix, isRectEqual, indexOfObject } from './utils';
 import Sortable from './Sortable';
-import { calculateRealTime, repaint } from './helpers/animation.js';
+import { calculateRealTime, repaint } from './helpers/animation';
 import { AnimationState, IHTMLElement } from './types';
 
 export default class AnimationStateManager {
@@ -89,8 +89,8 @@ export default class AnimationStateManager {
               // If returning to same place as started from animation and on same axis
               time = calculateRealTime(
                 animatingRect,
-                prevFromRect,
-                prevToRect,
+                prevFromRect!,
+                prevToRect!,
                 sortable.options
               );
             }
@@ -157,7 +157,7 @@ export default class AnimationStateManager {
             'translate3d(' + translateX + 'px,' + translateY + 'px,0)'
           );
 
-          sortable.forRepaintDummy = repaint(target); // repaint
+          sortable.forRepaintDummy = repaint(target as IHTMLElement); // repaint
 
           css(
             target,
