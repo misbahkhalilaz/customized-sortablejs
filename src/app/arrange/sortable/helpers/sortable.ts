@@ -1,12 +1,6 @@
 import { Edge } from '../BrowserInfo';
 import Sortable from '../Sortable';
-import {
-  ICSSStyleDeclaration,
-  IHTMLElement,
-  SortableGroup,
-  SortableOptions,
-  ToFnValueCB,
-} from '../types';
+import { SortableGroup, SortableOptions, ToFnValueCB } from '../types';
 import { css, expando, getChild, getRect, index, lastChild } from '../utils';
 
 const CSSFloatProperty = Edge ? 'cssFloat' : 'float';
@@ -19,17 +13,17 @@ export const _globalDragOver = (/**Event*/ evt: Event) => {
 };
 
 export const onMove = (
-  fromEl: IHTMLElement | null,
-  toEl: IHTMLElement,
-  dragEl: IHTMLElement | null,
-  dragRect: Partial<ICSSStyleDeclaration> | undefined,
-  targetEl: IHTMLElement,
-  targetRect: Partial<ICSSStyleDeclaration> | undefined,
+  fromEl: HTMLElement | null,
+  toEl: HTMLElement,
+  dragEl: HTMLElement | null,
+  dragRect: Partial<CSSStyleDeclaration> | undefined,
+  targetEl: HTMLElement,
+  targetRect: Partial<CSSStyleDeclaration> | undefined,
   originalEvent: Event,
   willInsertAfter: boolean
 ) => {
   let evt,
-    sortable = fromEl![expando as keyof IHTMLElement],
+    sortable = fromEl![expando as keyof HTMLElement],
     onMoveFn = sortable.options.onMove,
     retVal;
   // Support for new CustomEvent feature
@@ -62,7 +56,7 @@ export const onMove = (
   return retVal;
 };
 
-export const _disableDraggable = (el: IHTMLElement) => {
+export const _disableDraggable = (el: HTMLElement) => {
   el.draggable = false;
 };
 
@@ -72,15 +66,16 @@ export const _ghostIsFirst = (
   sortable: Sortable
 ) => {
   let rect = getRect(
-    getChild(sortable.el!, 0, sortable.options, true) as IHTMLElement
+    getChild(sortable.el!, 0, sortable.options, true) as HTMLElement
   )!;
   const spacer = 10;
 
   return vertical
-    ? evt.clientX! < rect.left! - spacer ||
-        (evt.clientY! < rect.top! && evt.clientX! < rect.right!)
-    : evt.clientY! < rect.top! - spacer ||
-        (evt.clientY! < rect.bottom! && evt.clientX! < rect.left!);
+    ? evt.clientX! < Number(rect.left) - spacer ||
+        (evt.clientY! < Number(rect.top) && evt.clientX! < Number(rect.right))
+    : evt.clientY! < Number(rect.top) - spacer ||
+        (evt.clientY! < Number(rect.bottom) &&
+          evt.clientX! < Number(rect.left));
 };
 
 export const _ghostIsLast = (
@@ -92,24 +87,25 @@ export const _ghostIsLast = (
   const spacer = 10;
 
   return vertical
-    ? evt.clientX! > rect.right! + spacer ||
-        (evt.clientX! <= rect.right! &&
-          evt.clientY! > rect.bottom! &&
-          evt.clientX! >= rect.left!)
-    : (evt.clientX! > rect.right! && evt.clientY! > rect.top!) ||
-        (evt.clientX! <= rect.right! && evt.clientY! > rect.bottom! + spacer);
+    ? evt.clientX! > Number(rect.right) + spacer ||
+        (evt.clientX! <= Number(rect.right) &&
+          evt.clientY! > Number(rect.bottom) &&
+          evt.clientX! >= Number(rect.left))
+    : (evt.clientX! > Number(rect.right) && evt.clientY! > Number(rect.top)) ||
+        (evt.clientX! <= Number(rect.right) &&
+          evt.clientY! > Number(rect.bottom) + spacer);
 };
 
 export const _getSwapDirection = (
   evt: Event,
-  target: IHTMLElement,
-  targetRect: Partial<ICSSStyleDeclaration> | undefined,
+  target: HTMLElement,
+  targetRect: Partial<CSSStyleDeclaration> | undefined,
   vertical: boolean,
   swapThreshold: number | undefined,
   invertedSwapThreshold: number | undefined,
   invertSwap: boolean,
   isLastTarget: boolean,
-  dragEl: IHTMLElement | null,
+  dragEl: HTMLElement | null,
   targetMoveDistance: number,
   pastFirstInvertThresh: boolean,
   lastDirection: number | null
@@ -122,16 +118,21 @@ export const _getSwapDirection = (
 
   if (!invertSwap) {
     // Never invert or create dragEl shadow when target movemenet causes mouse to move past the end of regular swapThreshold
-    if (isLastTarget && targetMoveDistance < targetLength! * swapThreshold!) {
+    if (
+      isLastTarget &&
+      targetMoveDistance < Number(targetLength) * swapThreshold!
+    ) {
       // multiplied only by swapThreshold because mouse will already be inside target by (1 - threshold) * targetLength / 2
       // check if past first invert threshold on side opposite of lastDirection
       if (
         !pastFirstInvertThresh &&
         (lastDirection === 1
           ? mouseOnAxis! >
-            targetS1! + (targetLength! * invertedSwapThreshold!) / 2
+            Number(targetS1) +
+              (Number(targetLength) * invertedSwapThreshold!) / 2
           : mouseOnAxis! <
-            targetS2! - (targetLength! * invertedSwapThreshold!) / 2)
+            Number(targetS2) -
+              (Number(targetLength) * invertedSwapThreshold!) / 2)
       ) {
         // past first invert threshold, do not restrict inverted threshold to dragEl shadow
         pastFirstInvertThresh = true;
@@ -141,8 +142,8 @@ export const _getSwapDirection = (
         // dragEl shadow (target move distance shadow)
         if (
           lastDirection === 1
-            ? mouseOnAxis! < targetS1! + targetMoveDistance // over dragEl shadow
-            : mouseOnAxis! > targetS2! - targetMoveDistance
+            ? mouseOnAxis! < Number(targetS1) + targetMoveDistance // over dragEl shadow
+            : mouseOnAxis! > Number(targetS2) - targetMoveDistance
         ) {
           return -lastDirection!;
         }
@@ -152,8 +153,11 @@ export const _getSwapDirection = (
     } else {
       // Regular
       if (
-        mouseOnAxis! > targetS1! + (targetLength! * (1 - swapThreshold!)) / 2 &&
-        mouseOnAxis! < targetS2! - (targetLength! * (1 - swapThreshold!)) / 2
+        mouseOnAxis! >
+          Number(targetS1) +
+            (Number(targetLength) * (1 - swapThreshold!)) / 2 &&
+        mouseOnAxis! <
+          Number(targetS2) - (Number(targetLength) * (1 - swapThreshold!)) / 2
       ) {
         return _getInsertDirection(target, dragEl!);
       }
@@ -165,10 +169,15 @@ export const _getSwapDirection = (
   if (invert) {
     // Invert of regular
     if (
-      mouseOnAxis! < targetS1! + (targetLength! * invertedSwapThreshold!) / 2 ||
-      mouseOnAxis! > targetS2! - (targetLength! * invertedSwapThreshold!) / 2
+      mouseOnAxis! <
+        Number(targetS1) +
+          (Number(targetLength) * invertedSwapThreshold!) / 2 ||
+      mouseOnAxis! >
+        Number(targetS2) - (Number(targetLength) * invertedSwapThreshold!) / 2
     ) {
-      return mouseOnAxis! > targetS1! + targetLength! / 2 ? 1 : -1;
+      return mouseOnAxis! > Number(targetS1) + Number(targetLength) / 2
+        ? 1
+        : -1;
     }
   }
 
@@ -182,8 +191,8 @@ export const _getSwapDirection = (
  * @return {Number}                   Direction dragEl must be swapped
  */
 export const _getInsertDirection = (
-  target: IHTMLElement,
-  dragEl: IHTMLElement
+  target: HTMLElement,
+  dragEl: HTMLElement
 ) => {
   if (index(dragEl) < index(target)) {
     return 1;
@@ -199,7 +208,7 @@ export const _getInsertDirection = (
  * @private
  */
 export const _generateId = (
-  el: HTMLImageElement | HTMLAnchorElement | IHTMLElement
+  el: HTMLImageElement | HTMLAnchorElement | HTMLElement
 ) => {
   let str =
       el.tagName +
@@ -218,7 +227,7 @@ export const _generateId = (
 };
 
 export const _saveInputCheckedState = (
-  root: IHTMLElement,
+  root: HTMLElement,
   savedInputChecked: any[]
 ) => {
   savedInputChecked.length = 0;
@@ -250,21 +259,18 @@ export const checkCssPointerEventSupport = (documentExists: boolean) => {
   return el.style.pointerEvents === 'auto';
 };
 
-export const _detectDirection = (
-  el: IHTMLElement,
-  options: SortableOptions
-) => {
-  let elCSS = css(el) as ICSSStyleDeclaration,
+export const _detectDirection = (el: HTMLElement, options: SortableOptions) => {
+  let elCSS = css(el) as CSSStyleDeclaration,
     elWidth =
       parseInt(elCSS.width.toString()) -
       parseInt(elCSS.paddingLeft) -
       parseInt(elCSS.paddingRight) -
       parseInt(elCSS.borderLeftWidth) -
       parseInt(elCSS.borderRightWidth),
-    child1 = getChild(el, 0, options) as IHTMLElement,
-    child2 = getChild(el, 1, options) as IHTMLElement,
-    firstChildCSS = child1 && (css(child1) as ICSSStyleDeclaration),
-    secondChildCSS = child2 && (css(child2) as ICSSStyleDeclaration),
+    child1 = getChild(el, 0, options) as HTMLElement,
+    child2 = getChild(el, 1, options) as HTMLElement,
+    firstChildCSS = child1 && (css(child1) as CSSStyleDeclaration),
+    secondChildCSS = child2 && (css(child2) as CSSStyleDeclaration),
     firstChildWidth =
       firstChildCSS &&
       parseInt(firstChildCSS.marginLeft) +
@@ -304,10 +310,11 @@ export const _detectDirection = (
       firstChildCSS.display === 'flex' ||
       firstChildCSS.display === 'table' ||
       firstChildCSS.display === 'grid' ||
-      (firstChildWidth >= elWidth && elCSS[CSSFloatProperty] === 'none') ||
+      (Number(firstChildWidth) >= elWidth &&
+        elCSS[CSSFloatProperty] === 'none') ||
       (child2 &&
         elCSS[CSSFloatProperty] === 'none' &&
-        firstChildWidth + secondChildWidth > elWidth))
+        Number(firstChildWidth) + Number(secondChildWidth) > elWidth))
     ? 'vertical'
     : 'horizontal';
 };
@@ -354,19 +361,19 @@ export const _dragElInRowColumn = (
 export const _detectNearestEmptySortable = (
   x: number,
   y: number,
-  sortables: IHTMLElement[]
+  sortables: HTMLElement[]
 ) => {
-  let ret: IHTMLElement | undefined;
-  sortables.some((sortable: IHTMLElement) => {
+  let ret: HTMLElement | undefined;
+  sortables.some((sortable: HTMLElement) => {
     const threshold =
-      sortable[expando as keyof IHTMLElement].options.emptyInsertThreshold;
+      sortable[expando as keyof HTMLElement].options.emptyInsertThreshold;
     if (!threshold || lastChild(sortable)) return;
 
     const rect = getRect(sortable)!,
       insideHorizontally =
-        x >= rect.left! - threshold && x <= rect.right + threshold,
+        x >= Number(rect.left) - threshold && x <= rect.right + threshold,
       insideVertically =
-        y >= rect.top! - threshold && y <= rect.bottom + threshold;
+        y >= Number(rect.top) - threshold && y <= rect.bottom + threshold;
 
     if (insideHorizontally && insideVertically) {
       return (ret = sortable);
@@ -383,7 +390,7 @@ export const _prepareGroup = (options: SortableOptions) => {
     return function (
       to: Sortable,
       from: Sortable,
-      dragEl: IHTMLElement,
+      dragEl: HTMLElement,
       evt: Event
     ): unknown {
       let sameGroup =
@@ -433,7 +440,7 @@ export const _prepareGroup = (options: SortableOptions) => {
 };
 
 export const _hideGhostForTarget = (
-  ghostEl: IHTMLElement | Element | null,
+  ghostEl: HTMLElement | Element | null,
   documentExists: boolean
 ) => {
   if (!checkCssPointerEventSupport(documentExists) && ghostEl) {
@@ -442,7 +449,7 @@ export const _hideGhostForTarget = (
 };
 
 export const _unhideGhostForTarget = (
-  ghostEl: IHTMLElement | Element | null,
+  ghostEl: HTMLElement | Element | null,
   documentExists?: boolean
 ) => {
   if (!checkCssPointerEventSupport(documentExists!) && ghostEl) {
@@ -452,8 +459,8 @@ export const _unhideGhostForTarget = (
 
 export const nearestEmptyInsertDetectEvent = (
   evt: Event,
-  dragEl: IHTMLElement | null,
-  sortables: IHTMLElement[]
+  dragEl: HTMLElement | null,
+  sortables: HTMLElement[]
 ) => {
   if (dragEl) {
     evt = (evt.touches ? evt.touches[0] : evt) as Event;
@@ -474,14 +481,14 @@ export const nearestEmptyInsertDetectEvent = (
       event['target'] = event['rootEl'] = nearest;
       event['preventDefault'] = void 0;
       event['stopPropagation'] = void 0;
-      nearest[expando as keyof IHTMLElement]?._onDragOver(event);
+      nearest[expando as keyof HTMLElement]?._onDragOver(event);
     }
   }
 };
 
 export const _checkOutsideTargetEl = (
   evt: { target: any },
-  dragEl: IHTMLElement | null
+  dragEl: HTMLElement | null
 ) => {
   if (dragEl) {
     (

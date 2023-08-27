@@ -1,7 +1,7 @@
 import { getRect, css, matrix, isRectEqual, indexOfObject } from './utils';
 import Sortable from './Sortable';
 import { calculateRealTime, repaint } from './helpers/animation';
-import { AnimationState, IHTMLElement } from './types';
+import { AnimationState } from './types';
 
 export default class AnimationStateManager {
   constructor(sortable: Sortable) {
@@ -12,7 +12,7 @@ export default class AnimationStateManager {
       captureAnimationState: () => {
         animationStates = [];
         if (!sortable.options.animation) return;
-        let children = [].slice.call(sortable.el?.children) as IHTMLElement[];
+        let children = [].slice.call(sortable.el?.children) as HTMLElement[];
 
         children.forEach((child) => {
           if (css(child, 'display') === 'none' || child === Sortable.ghost)
@@ -29,8 +29,10 @@ export default class AnimationStateManager {
           if (child.thisAnimationDuration) {
             let childMatrix = matrix(child, true);
             if (childMatrix) {
-              fromRect.top -= childMatrix.f;
-              fromRect.left -= childMatrix.e;
+              fromRect.top! = (Number(fromRect.top) -
+                childMatrix.f) as unknown as string;
+              fromRect.left = (Number(fromRect.left) -
+                childMatrix.e) as unknown as string;
             }
           }
 
@@ -69,8 +71,10 @@ export default class AnimationStateManager {
 
           if (targetMatrix) {
             // Compensate for current animation
-            toRect!.top! -= targetMatrix.f;
-            toRect!.left! -= targetMatrix.e;
+            toRect!.top! = (Number(toRect?.top) -
+              targetMatrix.f) as unknown as string;
+            toRect!.left! = (Number(toRect?.left) -
+              targetMatrix.e) as unknown as string;
           }
 
           target.toRect = toRect!;
@@ -134,7 +138,7 @@ export default class AnimationStateManager {
       },
 
       animate: (
-        target: IHTMLElement | Element,
+        target: HTMLElement | Element,
         currentRect: { left: number; top: number },
         toRect: { left: number; top: number },
         duration: string | number | undefined
@@ -157,7 +161,7 @@ export default class AnimationStateManager {
             'translate3d(' + translateX + 'px,' + translateY + 'px,0)'
           );
 
-          sortable.forRepaintDummy = repaint(target as IHTMLElement); // repaint
+          sortable.forRepaintDummy = repaint(target as HTMLElement); // repaint
 
           css(
             target,

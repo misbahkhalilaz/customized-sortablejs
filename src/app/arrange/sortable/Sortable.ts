@@ -48,11 +48,9 @@ import {
   _prepareGroup,
   _saveInputCheckedState,
   _unhideGhostForTarget,
-  checkCssPointerEventSupport,
   nearestEmptyInsertDetectEvent,
   onMove,
 } from './helpers/sortable';
-import { ICSSStyleDeclaration, IHTMLElement } from './types/override';
 import {
   SortableGroup,
   SortableOptions,
@@ -60,13 +58,13 @@ import {
 } from './types/Sortable';
 import { Void } from './types/global';
 
-let dragEl: IHTMLElement | null,
-  parentEl: IHTMLElement | null,
-  ghostEl: IHTMLElement | null,
-  rootEl: IHTMLElement | null,
-  nextEl: IHTMLElement | null,
-  lastDownEl: IHTMLElement | null,
-  cloneEl: IHTMLElement | null,
+let dragEl: HTMLElement | null,
+  parentEl: HTMLElement | null,
+  ghostEl: HTMLElement | null,
+  rootEl: HTMLElement | null,
+  nextEl: HTMLElement | null,
+  lastDownEl: HTMLElement | null,
+  cloneEl: HTMLElement | null,
   cloneHidden: boolean | null,
   oldIndex: number | null,
   newIndex: number | null,
@@ -90,7 +88,7 @@ let dragEl: IHTMLElement | null,
   isCircumstantialInvert = false,
   targetMoveDistance: number,
   // For positioning ghost absolutely
-  ghostRelativeParent: IHTMLElement | null,
+  ghostRelativeParent: HTMLElement | null,
   ghostRelativeParentInitialScroll: number[] = [], // (left, top)
   _silent = false,
   savedInputChecked: any[] = [];
@@ -144,15 +142,15 @@ if (documentExists) {
 class Sortable {
   static utils: SortableUtils;
   static version: number;
-  static ghost: IHTMLElement | null;
-  static clone: IHTMLElement | null;
-  static dragged: IHTMLElement | null;
+  static ghost: HTMLElement | null;
+  static clone: HTMLElement | null;
+  static dragged: HTMLElement | null;
   static eventCanceled: any;
   static supportPointer: boolean;
   static active: Sortable | null;
   private _dragStartTimer: NodeJS.Timeout | undefined;
 
-  el: IHTMLElement | null;
+  el: HTMLElement | null;
   options: SortableOptions;
   _ignoreWhileAnimating: EventTarget | null;
   defaults: SortableOptions;
@@ -167,7 +165,7 @@ class Sortable {
   forRepaintDummy?: number;
 
   constructor(
-    el: IHTMLElement & Record<string, Sortable>,
+    el: HTMLElement & Record<string, Sortable>,
     options: Partial<SortableOptions>
   ) {
     if (!(el && el.nodeType && el.nodeType === 1)) {
@@ -304,7 +302,7 @@ class Sortable {
   }
 
   _isOutsideThisEl(target: any) {
-    if (!(this.el as IHTMLElement).contains(target) && target !== this.el) {
+    if (!(this.el as HTMLElement).contains(target) && target !== this.el) {
       lastTarget = null;
     }
   }
@@ -318,18 +316,18 @@ class Sortable {
   _onTapStart(/** Event|TouchEvent */ evt: Event | TouchEvent) {
     if (!evt.cancelable) return;
     let _this = Sortable.get(this),
-      el = this as unknown as IHTMLElement,
+      el = this as unknown as HTMLElement,
       options = _this.options,
       preventOnFilter = _this.options.preventOnFilter,
       type = evt.type,
       touch =
         ((evt as TouchEvent).touches && (evt as TouchEvent).touches[0]) ||
         (evt.pointerType && evt.pointerType === 'touch' && evt),
-      target = (touch || evt).target as IHTMLElement,
+      target = (touch || evt).target as HTMLElement,
       originalTarget = (((evt.target as Element)?.shadowRoot &&
         ((evt.path && evt.path[0]) ||
           (evt.composedPath && evt.composedPath()[0]))) ||
-        target) as IHTMLElement,
+        target) as HTMLElement,
       filter = options.filter;
 
     _saveInputCheckedState(el, savedInputChecked);
@@ -361,7 +359,7 @@ class Sortable {
       return;
     }
 
-    target = closest(target, options.draggable!, el, false) as IHTMLElement;
+    target = closest(target, options.draggable!, el, false) as HTMLElement;
 
     if (target && target.animated) {
       return;
@@ -385,13 +383,13 @@ class Sortable {
     } else if (filter) {
       filter = (filter as string)
         .split(',')
-        .some(function (criteria: string | IHTMLElement | null) {
+        .some(function (criteria: string | HTMLElement | null) {
           criteria = closest(
-            originalTarget as IHTMLElement,
+            originalTarget as HTMLElement,
             (criteria as string).trim(),
             el,
             false
-          ) as IHTMLElement;
+          ) as HTMLElement;
 
           if (criteria) {
             return true;
@@ -417,7 +415,7 @@ class Sortable {
   _prepareDragStart(
     /** Event */ evt: Event,
     /** Touch */ touch: Touch,
-    /** HTMLElement */ target: IHTMLElement | null
+    /** HTMLElement */ target: HTMLElement | null
   ) {
     let _this = Sortable.get(this.el as unknown as Sortable),
       el = this.el,
@@ -429,8 +427,8 @@ class Sortable {
       let dragRect = getRect(target);
       rootEl = el;
       dragEl = target;
-      parentEl = dragEl.parentNode as IHTMLElement;
-      nextEl = dragEl.nextSibling as IHTMLElement;
+      parentEl = dragEl.parentNode as HTMLElement;
+      nextEl = dragEl.nextSibling as HTMLElement;
       lastDownEl = target;
       activeGroup = options.group as unknown as SortableGroup;
 
@@ -727,8 +725,8 @@ class Sortable {
         let cssMatrix = `matrix(${ghostMatrix.a},${ghostMatrix.b},${ghostMatrix.c},${ghostMatrix.d},${ghostMatrix.e},${ghostMatrix.f})`;
 
         css(ghostEl, 'webkitTransform', cssMatrix);
-        css(ghostEl, 'mozTransform' as keyof ICSSStyleDeclaration, cssMatrix);
-        css(ghostEl, 'msTransform' as keyof ICSSStyleDeclaration, cssMatrix);
+        css(ghostEl, 'mozTransform' as keyof CSSStyleDeclaration, cssMatrix);
+        css(ghostEl, 'msTransform' as keyof CSSStyleDeclaration, cssMatrix);
         css(ghostEl, 'transform', cssMatrix);
 
         lastDx = dx;
@@ -751,40 +749,40 @@ class Sortable {
           true,
           PositionGhostAbsolutely,
           true,
-          container as IHTMLElement
+          container as HTMLElement
         ),
         options = this.options;
 
       // Position absolutely
       if (PositionGhostAbsolutely) {
         // Get relatively positioned parent
-        ghostRelativeParent = container as IHTMLElement;
+        ghostRelativeParent = container as HTMLElement;
 
         while (
           css(ghostRelativeParent!, 'position') === 'static' &&
           css(ghostRelativeParent!, 'transform') === 'none' &&
-          ghostRelativeParent !== (document as unknown as IHTMLElement)
+          ghostRelativeParent !== (document as unknown as HTMLElement)
         ) {
-          ghostRelativeParent = ghostRelativeParent.parentNode as IHTMLElement;
+          ghostRelativeParent = ghostRelativeParent.parentNode as HTMLElement;
         }
 
         if (
           ghostRelativeParent !== document.body &&
           ghostRelativeParent !== document.documentElement
         ) {
-          if (ghostRelativeParent === (document as unknown as IHTMLElement))
-            ghostRelativeParent = getWindowScrollingElement() as IHTMLElement;
+          if (ghostRelativeParent === (document as unknown as HTMLElement))
+            ghostRelativeParent = getWindowScrollingElement() as HTMLElement;
 
           rect!.top! += ghostRelativeParent.scrollTop;
           rect!.left! += ghostRelativeParent.scrollLeft;
         } else {
-          ghostRelativeParent = getWindowScrollingElement() as IHTMLElement;
+          ghostRelativeParent = getWindowScrollingElement() as HTMLElement;
         }
         ghostRelativeParentInitialScroll =
           getRelativeScrollOffset(ghostRelativeParent);
       }
 
-      ghostEl = dragEl?.cloneNode(true) as IHTMLElement;
+      ghostEl = dragEl?.cloneNode(true) as HTMLElement;
 
       toggleClass(ghostEl, options.ghostClass!, false);
       toggleClass(ghostEl, options.fallbackClass!, true);
@@ -793,7 +791,7 @@ class Sortable {
       css(ghostEl, 'transition', '');
       css(ghostEl, 'transform', '');
 
-      css(ghostEl, 'box-sizing' as keyof ICSSStyleDeclaration, 'border-box');
+      css(ghostEl, 'box-sizing' as keyof CSSStyleDeclaration, 'border-box');
       css(ghostEl, 'margin', 0);
       css(ghostEl, 'top', rect?.['top']);
       css(ghostEl, 'left', rect?.['left']);
@@ -811,7 +809,7 @@ class Sortable {
       // Set transform-origin
       css(
         ghostEl,
-        'transform-origin' as keyof ICSSStyleDeclaration,
+        'transform-origin' as keyof CSSStyleDeclaration,
         (tapDistanceLeft / parseInt(ghostEl.style.width.toString())) * 100 +
           '% ' +
           (tapDistanceTop / parseInt(ghostEl.style.height.toString())) * 100 +
@@ -830,7 +828,7 @@ class Sortable {
     }
 
     if (!Sortable.eventCanceled) {
-      cloneEl = clone(dragEl!) as IHTMLElement;
+      cloneEl = clone(dragEl!) as HTMLElement;
       cloneEl?.removeAttribute('id');
       cloneEl.draggable = false;
       cloneEl.style['will-change'] = '';
@@ -885,8 +883,8 @@ class Sortable {
 
     if (Safari) {
       css(
-        document.body as IHTMLElement,
-        'user-select' as keyof ICSSStyleDeclaration,
+        document.body as HTMLElement,
+        'user-select' as keyof CSSStyleDeclaration,
         'none'
       );
     }
@@ -894,9 +892,9 @@ class Sortable {
 
   // Returns true - if no further action is needed (either inserted or another condition)
   _onDragOver(/**Event*/ evt: Event) {
-    let el = this.el as IHTMLElement,
+    let el = this.el as HTMLElement,
       _this = Sortable.get(el as unknown as Sortable),
-      target = evt.target as IHTMLElement,
+      target = evt.target as HTMLElement,
       dragRect,
       targetRect,
       revert,
@@ -972,7 +970,7 @@ class Sortable {
       if (
         !options.dragoverBubble &&
         !evt.rootEl &&
-        target !== (document as unknown as IHTMLElement)
+        target !== (document as unknown as HTMLElement)
       ) {
         (
           dragEl?.parentNode?.[expando as keyof ParentNode] as Sortable
@@ -1002,7 +1000,7 @@ class Sortable {
       options.draggable!,
       el,
       true
-    ) as IHTMLElement;
+    ) as HTMLElement;
 
     if (Sortable.eventCanceled) return completedFired;
 
@@ -1053,7 +1051,7 @@ class Sortable {
         return completed(true);
       }
 
-      let elLastChild = lastChild(el as IHTMLElement, options.draggable!);
+      let elLastChild = lastChild(el as HTMLElement, options.draggable!);
 
       if (
         !elLastChild ||
@@ -1072,7 +1070,7 @@ class Sortable {
         }
 
         if (target) {
-          targetRect = getRect(target as IHTMLElement);
+          targetRect = getRect(target as HTMLElement);
         }
 
         if (
@@ -1105,7 +1103,7 @@ class Sortable {
         if (firstChild === dragEl) {
           return completed(false);
         }
-        target = firstChild as IHTMLElement;
+        target = firstChild as HTMLElement;
         targetRect = getRect(target);
 
         if (
@@ -1127,8 +1125,8 @@ class Sortable {
           changed();
           return completed(true);
         }
-      } else if ((target as IHTMLElement)?.parentNode === el) {
-        targetRect = getRect(target as IHTMLElement);
+      } else if ((target as HTMLElement)?.parentNode === el) {
+        targetRect = getRect(target as HTMLElement);
         let direction = 0,
           targetBeforeFirstSwap,
           differentLevel = dragEl!.parentNode !== el,
@@ -1137,9 +1135,9 @@ class Sortable {
             (target!.animated && target!.toRect) || targetRect,
             vertical
           ),
-          side1 = (vertical ? 'top' : 'left') as keyof ICSSStyleDeclaration,
+          side1 = (vertical ? 'top' : 'left') as keyof CSSStyleDeclaration,
           scrolledPastTop =
-            isScrolledPast(target as IHTMLElement, 'top', 'top') ||
+            isScrolledPast(target as HTMLElement, 'top', 'top') ||
             isScrolledPast(dragEl!, 'top', 'top'),
           scrollBefore = scrolledPastTop ? scrolledPastTop.scrollTop : void 0;
 
@@ -1234,7 +1232,7 @@ class Sortable {
             );
           }
 
-          parentEl = dragEl?.parentNode as IHTMLElement; // actualization
+          parentEl = dragEl?.parentNode as HTMLElement; // actualization
 
           // must be done before animation
           if (targetBeforeFirstSwap !== undefined && !isCircumstantialInvert) {
@@ -1298,7 +1296,7 @@ class Sortable {
     newIndex = index(dragEl!);
     newDraggableIndex = index(dragEl!, options.draggable);
 
-    parentEl = dragEl && (dragEl.parentNode as IHTMLElement);
+    parentEl = dragEl && (dragEl.parentNode as HTMLElement);
 
     // Get again after plugin event
     newIndex = index(dragEl!);
@@ -1329,7 +1327,7 @@ class Sortable {
     this._offUpEvents();
 
     if (Safari) {
-      css(document.body, 'user-select' as keyof ICSSStyleDeclaration, '');
+      css(document.body, 'user-select' as keyof CSSStyleDeclaration, '');
     }
 
     css(dragEl!, 'transform', '');
@@ -1463,8 +1461,7 @@ class Sortable {
       el = children![i];
       if (closest(el, options.draggable!, this.el!, false)) {
         order.push(
-          el.getAttribute(options.dataIdAttr!) ||
-            _generateId(el as IHTMLElement)
+          el.getAttribute(options.dataIdAttr!) || _generateId(el as HTMLElement)
         );
       }
     }
@@ -1474,14 +1471,14 @@ class Sortable {
 
   sort(order: string[], useAnimation?: boolean) {
     let _this = Sortable.get(this),
-      items = {} as Record<string, IHTMLElement>,
-      rootEl = this.el as IHTMLElement;
+      items = {} as Record<string, HTMLElement>,
+      rootEl = this.el as HTMLElement;
 
     _this.toArray().forEach(function (id: string | number, i: number) {
       let el = rootEl.children[i];
 
       if (closest(el, _this.options.draggable!, rootEl, false)) {
-        items[id] = el as IHTMLElement;
+        items[id] = el as HTMLElement;
       }
     }, _this);
 
@@ -1509,7 +1506,7 @@ class Sortable {
    * @param   {String}       [selector]  default: `options.draggable`
    * @returns {HTMLElement|null}
    */
-  closest(el: IHTMLElement, selector: any) {
+  closest(el: HTMLElement, selector: any) {
     let _this = Sortable.get(this);
     return closest(el, selector || _this.options.draggable, this.el!, false);
   }
@@ -1616,9 +1613,9 @@ class Sortable {
     }
   }
   animate(
-    dragEl: IHTMLElement | null,
-    cloneEl: IHTMLElement | Partial<ICSSStyleDeclaration> | null,
-    toRect?: Partial<ICSSStyleDeclaration>,
+    dragEl: HTMLElement | null,
+    cloneEl: HTMLElement | Partial<CSSStyleDeclaration> | null,
+    toRect?: Partial<CSSStyleDeclaration>,
     time?: number
   ) {
     throw new Error('Method not implemented.');
@@ -1631,7 +1628,7 @@ Sortable.utils = {
   off: off,
   css: css,
   find: find,
-  is: function (el: IHTMLElement, selector: string) {
+  is: function (el: HTMLElement, selector: string) {
     return !!closest(el, selector, el, false);
   },
   extend: extend,

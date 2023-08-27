@@ -1,5 +1,5 @@
 import { SortableOptions } from './Sortable';
-import { ICSSStyleDeclaration, IHTMLElement } from './override';
+import { HTMLElement } from './override';
 
 declare global {
   var modifiedValue: SortableOptions[keyof SortableOptions] | undefined;
@@ -7,15 +7,10 @@ declare global {
   interface Window {
     CSSMatrix: string;
     MSCSSMatrix: unknown;
-    Polymer: {
-      dom: (el: IHTMLElement) => { cloneNode: (arg: boolean) => void };
-    };
-    jQuery: (el: IHTMLElement) => { clone: (arg: boolean) => number[] };
-    Zepto: Object;
   }
 
   interface Element {
-    style: ICSSStyleDeclaration & {
+    style: CSSStyleDeclaration & {
       'will-change': string;
     };
   }
@@ -28,13 +23,13 @@ declare global {
       effectAllowed: string;
       dropEffect: string;
     };
-    rootEl?: IHTMLElement;
-    to?: IHTMLElement;
-    from?: IHTMLElement;
-    dragged?: IHTMLElement;
-    draggedRect?: Partial<ICSSStyleDeclaration>;
-    related?: IHTMLElement;
-    relatedRect?: Partial<ICSSStyleDeclaration>;
+    rootEl?: HTMLElement;
+    to?: HTMLElement;
+    from?: HTMLElement;
+    dragged?: HTMLElement;
+    draggedRect?: Partial<CSSStyleDeclaration>;
+    related?: HTMLElement;
+    relatedRect?: Partial<CSSStyleDeclaration>;
     willInsertAfter?: boolean;
     originalEvent?: Event;
     clientY?: number;
@@ -49,7 +44,7 @@ declare global {
     animatingX?: unknown;
     animatingY?: unknown;
     toRect?: unknown;
-    nextElementSibling?: IHTMLElement;
+    nextElementSibling?: HTMLElement;
   }
 
   interface Document {
@@ -57,8 +52,33 @@ declare global {
   }
 
   interface MouseEvent {
-    rootEl?: IHTMLElement;
+    rootEl?: HTMLElement;
   }
+
+  interface HTMLElement {
+    animated: any;
+    msMatchesSelector: (selector: string) => void;
+    currentStyle: CSSStyleDeclaration;
+    host: {
+      nodeType: string;
+    };
+    toRect: Partial<CSSStyleDeclaration> | null;
+    fromRect: Partial<CSSStyleDeclaration> | null;
+    prevToRect: Partial<CSSStyleDeclaration> | null;
+    prevFromRect: Partial<CSSStyleDeclaration> | null;
+    thisAnimationDuration?: number | null;
+    animationResetTimer?: NodeJS.Timeout;
+    animationTime?: number;
+  }
+
+  // interface CSSStyleDeclaration {
+  //   top: number;
+  //   left: number;
+  //   bottom: number;
+  //   right: number;
+  //   width: number;
+  //   height: number;
+  // }
 }
 
 export type Void = () => void;

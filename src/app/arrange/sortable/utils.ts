@@ -1,10 +1,5 @@
 import Sortable from './Sortable';
-import {
-  ICSSStyleDeclaration,
-  IHTMLElement,
-  SortableOptions,
-  Void,
-} from './types/index';
+import { SortableOptions, Void } from './types/index';
 
 const captureMode = {
   capture: false,
@@ -12,7 +7,7 @@ const captureMode = {
 };
 
 function on(
-  el: IHTMLElement | Document,
+  el: HTMLElement | Document,
   event: string,
   fn: ((evt: Event | TouchEvent | PointerEvent) => void) | Sortable
 ) {
@@ -20,15 +15,15 @@ function on(
 }
 
 function off(
-  el: IHTMLElement | Document,
+  el: HTMLElement | Document,
   event: string,
   fn: Sortable | ((e: TouchEvent | PointerEvent | Event) => void)
 ) {
-  (el as IHTMLElement).removeEventListener(event, fn, captureMode);
+  (el as HTMLElement).removeEventListener(event, fn, captureMode);
 }
 
 function matches(
-  /**IHTMLElement*/ el: IHTMLElement | Element,
+  /**HTMLElement*/ el: HTMLElement | Element,
   /**String*/ selector: string
 ) {
   if (!selector) return;
@@ -39,8 +34,8 @@ function matches(
     try {
       if (el.matches) {
         return el.matches(selector);
-      } else if ((el as IHTMLElement).msMatchesSelector) {
-        return (el as IHTMLElement).msMatchesSelector(selector);
+      } else if ((el as HTMLElement).msMatchesSelector) {
+        return (el as HTMLElement).msMatchesSelector(selector);
       } else if (el.webkitMatchesSelector) {
         return el.webkitMatchesSelector(selector);
       }
@@ -52,16 +47,16 @@ function matches(
   return false;
 }
 
-function getParentOrHost(el: IHTMLElement) {
+function getParentOrHost(el: HTMLElement) {
   return el.host && (el as unknown as Document) !== document && el.host.nodeType
     ? el.host
     : el.parentNode;
 }
 
 function closest(
-  /**IHTMLElement*/ el: IHTMLElement | Element,
+  /**HTMLElement*/ el: HTMLElement | Element,
   /**String*/ selector: string,
-  /**IHTMLElement*/ ctx: IHTMLElement | Record<string, Sortable>,
+  /**HTMLElement*/ ctx: HTMLElement | Record<string, Sortable>,
   includeCTX: boolean
 ) {
   if (el) {
@@ -80,7 +75,7 @@ function closest(
 
       if (el === ctx) break;
       /* jshint boss:true */
-    } while ((el = getParentOrHost(el as IHTMLElement) as IHTMLElement));
+    } while ((el = getParentOrHost(el as HTMLElement) as HTMLElement));
   }
 
   return null;
@@ -88,7 +83,7 @@ function closest(
 
 const R_SPACE = /\s+/g;
 
-function toggleClass(el: IHTMLElement, name: string, state: boolean) {
+function toggleClass(el: HTMLElement, name: string, state: boolean) {
   if (el && name) {
     if (el.classList) {
       el.classList[state ? 'add' : 'remove'](name);
@@ -105,11 +100,11 @@ function toggleClass(el: IHTMLElement, name: string, state: boolean) {
 }
 
 function css(
-  el: IHTMLElement | Element,
-  prop?: keyof ICSSStyleDeclaration,
-  val?: ICSSStyleDeclaration | string | number
+  el: HTMLElement | Element,
+  prop?: keyof CSSStyleDeclaration,
+  val?: CSSStyleDeclaration | string | number
 ) {
-  let style = (el && el.style) as ICSSStyleDeclaration;
+  let style = (el && el.style) as CSSStyleDeclaration;
 
   if (style) {
     if (val === void 0) {
@@ -117,15 +112,15 @@ function css(
         val = document.defaultView.getComputedStyle(
           el,
           ''
-        ) as unknown as ICSSStyleDeclaration;
-      } else if ((el as IHTMLElement).currentStyle) {
-        val = (el as IHTMLElement).currentStyle;
+        ) as unknown as CSSStyleDeclaration;
+      } else if ((el as HTMLElement).currentStyle) {
+        val = (el as HTMLElement).currentStyle;
       }
 
       return prop === void 0 ? val : val?.[prop];
     } else {
       if (!(prop! in style) && (prop as string).indexOf('webkit') === -1) {
-        prop = ('-webkit-' + prop) as keyof ICSSStyleDeclaration;
+        prop = ('-webkit-' + prop) as keyof CSSStyleDeclaration;
       }
 
       style[prop as number] = val + (typeof val === 'string' ? '' : 'px');
@@ -135,7 +130,7 @@ function css(
   return;
 }
 
-function matrix(el: IHTMLElement, selfOnly?: boolean) {
+function matrix(el: HTMLElement, selfOnly?: boolean) {
   let appliedTransforms = '';
   if (typeof el === 'string') {
     appliedTransforms = el;
@@ -147,7 +142,7 @@ function matrix(el: IHTMLElement, selfOnly?: boolean) {
         appliedTransforms = transform + ' ' + appliedTransforms;
       }
       /* jshint boss:true */
-    } while (!selfOnly && (el = el.parentNode as IHTMLElement));
+    } while (!selfOnly && (el = el.parentNode as HTMLElement));
   }
 
   const matrixFn =
@@ -160,12 +155,12 @@ function matrix(el: IHTMLElement, selfOnly?: boolean) {
 }
 
 function find(
-  ctx: IHTMLElement,
+  ctx: HTMLElement,
   tagName: string,
-  iterator: (el: IHTMLElement, i: number) => void
+  iterator: (el: HTMLElement, i: number) => void
 ) {
   if (ctx) {
-    let list = ctx.getElementsByTagName(tagName) as unknown as IHTMLElement[],
+    let list = ctx.getElementsByTagName(tagName) as unknown as HTMLElement[],
       i = 0,
       n = list.length;
 
@@ -193,27 +188,27 @@ function getWindowScrollingElement() {
 
 /**
  * Returns the "bounding client rect" of given element
- * @param  {IHTMLElement} el                       The element whose boundingClientRect is wanted
+ * @param  {HTMLElement} el                       The element whose boundingClientRect is wanted
  * @param  {[Boolean]} relativeToContainingBlock  Whether the rect should be relative to the containing block of (including) the container
  * @param  {[Boolean]} relativeToNonStaticParent  Whether the rect should be relative to the relative parent of (including) the contaienr
  * @param  {[Boolean]} undoScale                  Whether the container's scale() should be undone
- * @param  {[IHTMLElement]} container              The parent the element will be placed in
+ * @param  {[HTMLElement]} container              The parent the element will be placed in
  * @return {Object}                               The boundingClientRect of el, with specified adjustments
  */
 function getRect(
-  el: IHTMLElement,
+  el: HTMLElement,
   relativeToContainingBlock?: boolean[] | boolean,
   relativeToNonStaticParent?: boolean[] | boolean,
   undoScale?: boolean[] | boolean,
-  container?: IHTMLElement
-): Partial<ICSSStyleDeclaration> | undefined {
-  if (!el.getBoundingClientRect && el !== (window as unknown as IHTMLElement))
+  container?: HTMLElement
+) {
+  if (!el.getBoundingClientRect && el !== (window as unknown as HTMLElement))
     return;
 
   let elRect, top, left, bottom, right, height, width;
 
   if (
-    el !== (window as unknown as IHTMLElement) &&
+    el !== (window as unknown as HTMLElement) &&
     el.parentNode &&
     el !== getWindowScrollingElement()
   ) {
@@ -235,10 +230,10 @@ function getRect(
 
   if (
     (relativeToContainingBlock || relativeToNonStaticParent) &&
-    el !== (window as unknown as IHTMLElement)
+    el !== (window as unknown as HTMLElement)
   ) {
     // Adjust for translate()
-    container = container || (el.parentNode as IHTMLElement);
+    container = container || (el.parentNode as HTMLElement);
 
     // solves #1123 (see: https://stackoverflow.com/a/37953806/6088312)
     do {
@@ -257,7 +252,7 @@ function getRect(
           parseInt(
             css(
               container,
-              'border-top-width' as keyof ICSSStyleDeclaration
+              'border-top-width' as keyof CSSStyleDeclaration
             ) as string
           );
         left -=
@@ -265,7 +260,7 @@ function getRect(
           parseInt(
             css(
               container,
-              'border-left-width' as keyof ICSSStyleDeclaration
+              'border-left-width' as keyof CSSStyleDeclaration
             ) as string
           );
         bottom = top + elRect?.height!;
@@ -274,10 +269,10 @@ function getRect(
         break;
       }
       /* jshint boss:true */
-    } while ((container = container.parentNode as IHTMLElement));
+    } while ((container = container.parentNode as HTMLElement));
   }
 
-  if (undoScale && el !== (window as unknown as IHTMLElement)) {
+  if (undoScale && el !== (window as unknown as HTMLElement)) {
     // Adjust for scale()
     let elMatrix = matrix(container || el),
       scaleX = elMatrix && elMatrix.a,
@@ -302,17 +297,17 @@ function getRect(
     right: right,
     width: width,
     height: height,
-  };
+  } as unknown as Partial<CSSStyleDeclaration>;
 }
 
-function isScrolledPast(el: IHTMLElement, elSide: string, parentSide: string) {
-  let parent = getParentAutoScrollElement(el, true) as IHTMLElement,
-    elSideVal = getRect(el)?.[elSide as keyof ICSSStyleDeclaration]!;
+function isScrolledPast(el: HTMLElement, elSide: string, parentSide: string) {
+  let parent = getParentAutoScrollElement(el, true) as HTMLElement,
+    elSideVal = getRect(el)?.[elSide as keyof CSSStyleDeclaration]!;
 
   /* jshint boss:true */
   while (parent) {
     let parentSideVal =
-        getRect(parent)?.[parentSide as keyof ICSSStyleDeclaration]!,
+        getRect(parent)?.[parentSide as keyof CSSStyleDeclaration]!,
       visible;
 
     if (parentSide === 'top' || parentSide === 'left') {
@@ -325,7 +320,7 @@ function isScrolledPast(el: IHTMLElement, elSide: string, parentSide: string) {
 
     if (parent === getWindowScrollingElement()) break;
 
-    parent = getParentAutoScrollElement(parent, false) as IHTMLElement;
+    parent = getParentAutoScrollElement(parent, false) as HTMLElement;
   }
 
   return false;
@@ -334,13 +329,13 @@ function isScrolledPast(el: IHTMLElement, elSide: string, parentSide: string) {
 /**
  * Gets nth child of el, ignoring hidden children, sortable's elements (does not ignore clone if it's visible)
  * and non-draggable elements
- * @param  {IHTMLElement} el       The parent element
+ * @param  {HTMLElement} el       The parent element
  * @param  {Number} childNum      The index of the child
  * @param  {Object} options       Parent Sortable's options
- * @return {IHTMLElement}          The child at index childNum, or null if not found
+ * @return {HTMLElement}          The child at index childNum, or null if not found
  */
 function getChild(
-  el: IHTMLElement,
+  el: HTMLElement,
   childNum: number,
   options: SortableOptions,
   includeDragEl?: boolean
@@ -355,7 +350,7 @@ function getChild(
       children[i] !== Sortable.ghost &&
       (includeDragEl || children[i] !== Sortable.dragged) &&
       closest(
-        children[i] as IHTMLElement,
+        children[i] as HTMLElement,
         options.draggable as string,
         el,
         false
@@ -374,12 +369,12 @@ function getChild(
 
 /**
  * Gets the last child in the el, ignoring ghostEl or invisible elements (clones)
- * @param  {IHTMLElement} el       Parent element
+ * @param  {HTMLElement} el       Parent element
  * @param  {selector} selector    Any other elements that should be ignored
- * @return {IHTMLElement}          The last child, ignoring ghostEl
+ * @return {HTMLElement}          The last child, ignoring ghostEl
  */
-function lastChild(el: IHTMLElement, selector?: string) {
-  let last = el.lastElementChild as IHTMLElement;
+function lastChild(el: HTMLElement, selector?: string) {
+  let last = el.lastElementChild as HTMLElement;
 
   while (
     last &&
@@ -387,7 +382,7 @@ function lastChild(el: IHTMLElement, selector?: string) {
       css(last, 'display') === 'none' ||
       (selector && !matches(last, selector)))
   ) {
-    last = last.previousElementSibling as IHTMLElement;
+    last = last.previousElementSibling as HTMLElement;
   }
 
   return last || null;
@@ -396,11 +391,11 @@ function lastChild(el: IHTMLElement, selector?: string) {
 /**
  * Returns the index of an element within its parent for a selected set of
  * elements
- * @param  {IHTMLElement} el
+ * @param  {HTMLElement} el
  * @param  {selector} selector
  * @return {number}
  */
-function index(el: IHTMLElement, selector?: string) {
+function index(el: HTMLElement, selector?: string) {
   let index = 0;
 
   if (!el || !el.parentNode) {
@@ -408,7 +403,7 @@ function index(el: IHTMLElement, selector?: string) {
   }
 
   /* jshint boss:true */
-  while ((el = el.previousElementSibling as IHTMLElement)) {
+  while ((el = el.previousElementSibling as HTMLElement)) {
     if (
       el.nodeName.toUpperCase() !== 'TEMPLATE' &&
       el !== Sortable.clone &&
@@ -424,10 +419,10 @@ function index(el: IHTMLElement, selector?: string) {
 /**
  * Returns the scroll offset of the given element, added with all the scroll offsets of parent elements.
  * The value is returned in real pixels.
- * @param  {IHTMLElement} el
+ * @param  {HTMLElement} el
  * @return {Array}             Offsets in the format of [left, top]
  */
-function getRelativeScrollOffset(el: IHTMLElement) {
+function getRelativeScrollOffset(el: HTMLElement) {
   let offsetLeft = 0,
     offsetTop = 0,
     winScroller = getWindowScrollingElement();
@@ -440,7 +435,7 @@ function getRelativeScrollOffset(el: IHTMLElement) {
 
       offsetLeft += el.scrollLeft * scaleX;
       offsetTop += el.scrollTop * scaleY;
-    } while (el !== winScroller && (el = el.parentNode as IHTMLElement));
+    } while (el !== winScroller && (el = el.parentNode as HTMLElement));
   }
 
   return [offsetLeft, offsetTop];
@@ -466,7 +461,7 @@ function indexOfObject(arr: Array<Object>, obj: Object) {
   return -1;
 }
 
-function getParentAutoScrollElement(el: IHTMLElement, includeSelf: boolean) {
+function getParentAutoScrollElement(el: HTMLElement, includeSelf: boolean) {
   // skip to window
   if (!el || !el.getBoundingClientRect) return getWindowScrollingElement();
 
@@ -478,7 +473,7 @@ function getParentAutoScrollElement(el: IHTMLElement, includeSelf: boolean) {
       elem.clientWidth < elem.scrollWidth ||
       elem.clientHeight < elem.scrollHeight
     ) {
-      let elemCSS = css(elem) as ICSSStyleDeclaration;
+      let elemCSS = css(elem) as CSSStyleDeclaration;
       if (
         (elem.clientWidth < elem.scrollWidth &&
           (elemCSS.overflowX == 'auto' || elemCSS.overflowX == 'scroll')) ||
@@ -493,7 +488,7 @@ function getParentAutoScrollElement(el: IHTMLElement, includeSelf: boolean) {
       }
     }
     /* jshint boss:true */
-  } while ((elem = elem.parentNode as IHTMLElement));
+  } while ((elem = elem.parentNode as HTMLElement));
 
   return getWindowScrollingElement();
 }
@@ -514,8 +509,8 @@ function extend(
 }
 
 function isRectEqual(
-  rect1: Partial<ICSSStyleDeclaration>,
-  rect2: Partial<ICSSStyleDeclaration>
+  rect1: Partial<CSSStyleDeclaration>,
+  rect2: Partial<CSSStyleDeclaration>
 ) {
   return (
     Math.round(+rect1.top!) === Math.round(+rect2.top!) &&
@@ -550,16 +545,16 @@ function cancelThrottle() {
   _throttleTimeout = void 0;
 }
 
-function scrollBy(el: IHTMLElement, x: number, y: number) {
+function scrollBy(el: HTMLElement, x: number, y: number) {
   el.scrollLeft += x;
   el.scrollTop += y;
 }
 
-function clone(el: IHTMLElement) {
+function clone(el: HTMLElement) {
   return el.cloneNode(true);
 }
 
-function setRect(el: IHTMLElement, rect: ICSSStyleDeclaration) {
+function setRect(el: HTMLElement, rect: CSSStyleDeclaration) {
   css(el, 'position', 'absolute');
   css(el, 'top', rect.top);
   css(el, 'left', rect.left);
@@ -567,7 +562,7 @@ function setRect(el: IHTMLElement, rect: ICSSStyleDeclaration) {
   css(el, 'height', rect.height);
 }
 
-function unsetRect(el: IHTMLElement) {
+function unsetRect(el: HTMLElement) {
   css(el, 'position', '');
   css(el, 'top', '');
   css(el, 'left', '');

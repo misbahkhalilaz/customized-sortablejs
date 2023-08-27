@@ -1,6 +1,6 @@
-import { IHTMLElement } from './override';
+import { HTMLElement } from './override';
 
 export interface AnimationState {
-  target: IHTMLElement;
-  rect: Partial<ICSSStyleDeclaration>;
+  target: HTMLElement;
+  rect: Partial<CSSStyleDeclaration>;
 }

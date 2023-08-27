@@ -1,4 +1,4 @@
-import { IHTMLElement } from './override';
+import { HTMLElement } from './override';
 import { Void } from './global';
 import Sortable from '../Sortable';
 import { closest, on, css } from '../utils';
@@ -30,7 +30,7 @@ export interface SortableOptions {
     get: (element: Sortable) => Sortable | string[];
     set: (element: Sortable) => void;
   } | null;
-  direction?: (evt: Event, target: EventTarget, dragEl: IHTMLElement) => string;
+  direction?: (evt: Event, target: EventTarget, dragEl: HTMLElement) => string;
   dragClass?: string;
   ghostClass?: string;
   dragoverBubble?: any;
@@ -52,13 +52,13 @@ export interface SortableGroup {
   checkPull?: (
     _this: Sortable,
     activeSortable: Sortable,
-    dragEl: IHTMLElement,
+    dragEl: HTMLElement,
     evt: Event
   ) => void;
   checkPut?: (
     _this: Sortable,
     activeSortable: Sortable,
-    dragEl: IHTMLElement,
+    dragEl: HTMLElement,
     evt: Event
   ) => void;
   pull?: ToFnValueCB;
@@ -67,14 +67,14 @@ export interface SortableGroup {
 
 export interface SortableUtils {
   on: typeof on;
-  off: (el: IHTMLElement, event: string, fn: Void) => void;
+  off: (el: HTMLElement, event: string, fn: Void) => void;
   css: ReturnType<css>;
   find: (
-    ctx: IHTMLElement,
+    ctx: HTMLElement,
     tagName: string,
     iterator: (el: Element, i: number) => void
   ) => unknown[] | HTMLCollectionOf<Element>;
-  is: (el: IHTMLElement, selector: string) => boolean;
+  is: (el: HTMLElement, selector: string) => boolean;
   extend: (
     dst: Record<string | number, unknown>,
     src: Record<string | number, unknown>
@@ -84,14 +84,14 @@ export interface SortableUtils {
     ms: number
   ) => (this: ThisType<Void>) => void;
   closest: typeof closest;
-  toggleClass: (el: IHTMLElement, name: string, state: boolean) => void;
-  clone: (el: IHTMLElement) => number | void | Node;
-  index: (el: IHTMLElement, selector: string) => number;
+  toggleClass: (el: HTMLElement, name: string, state: boolean) => void;
+  clone: (el: HTMLElement) => number | void | Node;
+  index: (el: HTMLElement, selector: string) => number;
   nextTick: (fn: any) => NodeJS.Timeout;
   cancelNextTick: (id: any) => void;
   detectDirection: (el: any, options: any) => 'vertical' | 'horizontal';
   getChild: (
-    el: IHTMLElement,
+    el: HTMLElement,
     childNum: number,
     options: Object,
     includeDragEl: boolean
@@ -101,6 +101,6 @@ export interface SortableUtils {
 export type ToFnValueCB = (
   to: Sortable,
   from: Sortable,
-  dragEl: IHTMLElement,
+  dragEl: HTMLElement,
   evt: Event
 ) => null;
