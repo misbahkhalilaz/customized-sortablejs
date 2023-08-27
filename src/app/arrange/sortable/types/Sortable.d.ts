@@ -87,7 +87,7 @@ export interface SortableUtils {
   toggleClass: (el: HTMLElement, name: string, state: boolean) => void;
   clone: (el: HTMLElement) => number | void | Node;
   index: (el: HTMLElement, selector: string) => number;
-  nextTick: (fn: any) => NodeJS.Timeout;
+  nextTick: (fn: any) => ReturnType<typeof setTimeout>;
   cancelNextTick: (id: any) => void;
   detectDirection: (el: any, options: any) => 'vertical' | 'horizontal';
   getChild: (

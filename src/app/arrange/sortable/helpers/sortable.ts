@@ -246,7 +246,7 @@ export const _nextTick = (fn: { (): void; (): void; (): void; (): void }) => {
 };
 
 export const _cancelNextTick = (
-  id: string | number | NodeJS.Timeout | undefined
+  id: string | number | ReturnType<typeof setTimeout> | undefined
 ) => {
   return clearTimeout(id);
 };

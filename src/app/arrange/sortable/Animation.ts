@@ -6,7 +6,7 @@ import { AnimationState } from './types';
 export default class AnimationStateManager {
   constructor(sortable: Sortable) {
     let animationStates: AnimationState[] = [],
-      animationCallbackId: string | number | NodeJS.Timeout | undefined;
+      animationCallbackId: string | number | ReturnType<typeof setTimeout> | undefined;
 
     return {
       captureAnimationState: () => {

@@ -148,7 +148,7 @@ class Sortable {
   static eventCanceled: any;
   static supportPointer: boolean;
   static active: Sortable | null;
-  private _dragStartTimer: NodeJS.Timeout | undefined;
+  private _dragStartTimer: ReturnType<typeof setTimeout> | undefined;
 
   el: HTMLElement | null;
   options: SortableOptions;
@@ -157,9 +157,9 @@ class Sortable {
   nativeDraggable: boolean;
   _lastX: number | undefined;
   _lastY: number | undefined;
-  cloneId: NodeJS.Timeout | undefined;
+  cloneId: ReturnType<typeof setTimeout> | undefined;
   _loopId: NodeJS.Timer | undefined;
-  _dragStartId: NodeJS.Timeout | undefined;
+  _dragStartId: ReturnType<typeof setTimeout> | undefined;
   lastPutMode: any;
   animateAll: ((arg?: Void) => void) | undefined;
   forRepaintDummy?: number;

@@ -520,7 +520,7 @@ function isRectEqual(
   );
 }
 
-let _throttleTimeout: NodeJS.Timeout | undefined;
+let _throttleTimeout: ReturnType<typeof setTimeout> | undefined;
 function throttle(callback: (args: IArguments) => void, ms: number) {
   return function (this: ThisType<Void>) {
     if (!_throttleTimeout) {

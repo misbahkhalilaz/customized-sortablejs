@@ -67,18 +67,9 @@ declare global {
     prevToRect: Partial<CSSStyleDeclaration> | null;
     prevFromRect: Partial<CSSStyleDeclaration> | null;
     thisAnimationDuration?: number | null;
-    animationResetTimer?: NodeJS.Timeout;
+    animationResetTimer?: ReturnType<typeof setTimeout>;
     animationTime?: number;
   }
-
-  // interface CSSStyleDeclaration {
-  //   top: number;
-  //   left: number;
-  //   bottom: number;
-  //   right: number;
-  //   width: number;
-  //   height: number;
-  // }
 }
 
 export type Void = () => void;
