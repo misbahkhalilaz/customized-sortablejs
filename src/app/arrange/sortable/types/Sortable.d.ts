@@ -2,8 +2,10 @@ import { HTMLElement } from './override';
 import { Void } from './global';
 import Sortable from '../Sortable';
 import { closest, on, css } from '../utils';
+import { onMove } from '../helpers/sortable';
 
 export interface SortableOptions {
+  onMove?: typeof onMove;
   preventOnFilter?: boolean;
   animation?: number;
   easing?: boolean | null;

@@ -54,7 +54,7 @@ function getParentOrHost(el: HTMLElement) {
 }
 
 function closest(
-  /**HTMLElement*/ el: HTMLElement | Element,
+  /**HTMLElement*/ el: Element,
   /**String*/ selector: string,
   /**HTMLElement*/ ctx: HTMLElement | Record<string, Sortable>,
   includeCTX: boolean
@@ -100,9 +100,9 @@ function toggleClass(el: HTMLElement, name: string, state: boolean) {
 }
 
 function css(
-  el: HTMLElement | Element,
+  el: HTMLElement,
   prop?: keyof CSSStyleDeclaration,
-  val?: CSSStyleDeclaration | string | number
+  val?: CSSStyleDeclaration[keyof CSSStyleDeclaration] | CSSStyleDeclaration
 ):
   | CSSStyleDeclaration
   | CSSStyleDeclaration[keyof CSSStyleDeclaration]
@@ -395,7 +395,7 @@ function lastChild(el: HTMLElement, selector?: string) {
  * @param  {selector} selector
  * @return {number}
  */
-function index(el: HTMLElement, selector?: string) {
+function index(el: Element, selector?: string) {
   let index = 0;
 
   if (!el || !el.parentNode) {
@@ -403,7 +403,7 @@ function index(el: HTMLElement, selector?: string) {
   }
 
   /* jshint boss:true */
-  while ((el = el.previousElementSibling as HTMLElement)) {
+  while ((el = el.previousElementSibling!)) {
     if (
       el.nodeName.toUpperCase() !== 'TEMPLATE' &&
       el !== Sortable.clone &&

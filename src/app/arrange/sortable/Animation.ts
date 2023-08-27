@@ -6,7 +6,11 @@ import { AnimationState } from './types';
 export default class AnimationStateManager {
   constructor(sortable: Sortable) {
     let animationStates: AnimationState[] = [],
-      animationCallbackId: string | number | ReturnType<typeof setTimeout> | undefined;
+      animationCallbackId:
+        | string
+        | number
+        | ReturnType<typeof setTimeout>
+        | undefined;
 
     return {
       captureAnimationState: () => {
@@ -138,7 +142,7 @@ export default class AnimationStateManager {
       },
 
       animate: (
-        target: HTMLElement | Element,
+        target: HTMLElement,
         currentRect: { left: number; top: number },
         toRect: { left: number; top: number },
         duration: string | number | undefined
@@ -161,7 +165,7 @@ export default class AnimationStateManager {
             'translate3d(' + translateX + 'px,' + translateY + 'px,0)'
           );
 
-          sortable.forRepaintDummy = repaint(target as HTMLElement); // repaint
+          sortable.forRepaintDummy = repaint(target); // repaint
 
           css(
             target,

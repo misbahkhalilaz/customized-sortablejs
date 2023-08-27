@@ -14,16 +14,16 @@ export const _globalDragOver = (/**Event*/ evt: Event) => {
 
 export const onMove = (
   fromEl: HTMLElement | null,
-  toEl: HTMLElement,
-  dragEl: HTMLElement | null,
-  dragRect: Partial<CSSStyleDeclaration> | undefined,
-  targetEl: HTMLElement,
-  targetRect: Partial<CSSStyleDeclaration> | undefined,
-  originalEvent: Event,
-  willInsertAfter: boolean
-) => {
+  toEl?: HTMLElement,
+  dragEl?: HTMLElement | null,
+  dragRect?: Partial<CSSStyleDeclaration> | undefined,
+  targetEl?: HTMLElement,
+  targetRect?: Partial<CSSStyleDeclaration> | undefined,
+  originalEvent?: Event,
+  willInsertAfter?: boolean
+): boolean | number => {
   let evt,
-    sortable = fromEl![expando as keyof HTMLElement],
+    sortable = fromEl![expando as keyof HTMLElement] as Sortable,
     onMoveFn = sortable.options.onMove,
     retVal;
   // Support for new CustomEvent feature
@@ -42,7 +42,7 @@ export const onMove = (
   evt.dragged = dragEl!;
   evt.draggedRect = dragRect;
   evt.related = targetEl || toEl;
-  evt.relatedRect = targetRect || getRect(toEl);
+  evt.relatedRect = targetRect || getRect(toEl!);
   evt.willInsertAfter = willInsertAfter;
 
   evt.originalEvent = originalEvent;
@@ -50,10 +50,14 @@ export const onMove = (
   fromEl!.dispatchEvent(evt);
 
   if (onMoveFn) {
-    retVal = onMoveFn.call(sortable, evt, originalEvent);
+    retVal = onMoveFn.call(
+      sortable,
+      evt as unknown as HTMLElement,
+      originalEvent as unknown as HTMLElement
+    );
   }
 
-  return retVal;
+  return retVal as boolean;
 };
 
 export const _disableDraggable = (el: HTMLElement) => {
@@ -365,15 +369,16 @@ export const _detectNearestEmptySortable = (
 ) => {
   let ret: HTMLElement | undefined;
   sortables.some((sortable: HTMLElement) => {
-    const threshold =
-      sortable[expando as keyof HTMLElement].options.emptyInsertThreshold;
+    const threshold = (sortable[expando as keyof HTMLElement] as Sortable)
+      .options.emptyInsertThreshold;
     if (!threshold || lastChild(sortable)) return;
 
     const rect = getRect(sortable)!,
       insideHorizontally =
-        x >= Number(rect.left) - threshold && x <= rect.right + threshold,
-      insideVertically =
-        y >= Number(rect.top) - threshold && y <= rect.bottom + threshold;
+        x >= Number(rect.left) - threshold &&
+        x <= Number(rect.right) + threshold,
+      insideVertically = 9;
+    y >= Number(rect.top) - threshold && y <= Number(rect.bottom) + threshold;
 
     if (insideHorizontally && insideVertically) {
       return (ret = sortable);
@@ -440,7 +445,7 @@ export const _prepareGroup = (options: SortableOptions) => {
 };
 
 export const _hideGhostForTarget = (
-  ghostEl: HTMLElement | Element | null,
+  ghostEl: HTMLElement | null,
   documentExists: boolean
 ) => {
   if (!checkCssPointerEventSupport(documentExists) && ghostEl) {
@@ -449,7 +454,7 @@ export const _hideGhostForTarget = (
 };
 
 export const _unhideGhostForTarget = (
-  ghostEl: HTMLElement | Element | null,
+  ghostEl: HTMLElement | null,
   documentExists?: boolean
 ) => {
   if (!checkCssPointerEventSupport(documentExists!) && ghostEl) {
@@ -472,7 +477,7 @@ export const nearestEmptyInsertDetectEvent = (
 
     if (nearest) {
       // Create imitation event
-      let event: Record<string, Event[keyof Event] | undefined> = {};
+      let event: Record<string, Event[keyof Event]> | Event = {};
       for (let i in evt) {
         if (evt.hasOwnProperty(i)) {
           event[i] = evt[i as keyof Event];
@@ -481,7 +486,9 @@ export const nearestEmptyInsertDetectEvent = (
       event['target'] = event['rootEl'] = nearest;
       event['preventDefault'] = void 0;
       event['stopPropagation'] = void 0;
-      nearest[expando as keyof HTMLElement]?._onDragOver(event);
+      (nearest[expando as keyof HTMLElement] as Sortable)?._onDragOver(
+        event as unknown as Event
+      );
     }
   }
 };

@@ -59,11 +59,11 @@ import {
 import { Void } from './types/global';
 
 let dragEl: HTMLElement | null,
-  parentEl: HTMLElement | null,
+  parentEl: ParentNode | null,
   ghostEl: HTMLElement | null,
   rootEl: HTMLElement | null,
-  nextEl: HTMLElement | null,
-  lastDownEl: HTMLElement | null,
+  nextEl: ChildNode | null,
+  lastDownEl: Element | null,
   cloneEl: HTMLElement | null,
   cloneHidden: boolean | null,
   oldIndex: number | null,
@@ -144,7 +144,7 @@ class Sortable {
   static version: number;
   static ghost: HTMLElement | null;
   static clone: HTMLElement | null;
-  static dragged: HTMLElement | null;
+  static dragged: Element | null;
   static eventCanceled: any;
   static supportPointer: boolean;
   static active: Sortable | null;
@@ -302,7 +302,7 @@ class Sortable {
   }
 
   _isOutsideThisEl(target: any) {
-    if (!(this.el as HTMLElement).contains(target) && target !== this.el) {
+    if (!this.el?.contains(target) && target !== this.el) {
       lastTarget = null;
     }
   }
@@ -426,9 +426,9 @@ class Sortable {
     if (target && !dragEl && target.parentNode === el) {
       let dragRect = getRect(target);
       rootEl = el;
-      dragEl = target;
-      parentEl = dragEl.parentNode as HTMLElement;
-      nextEl = dragEl.nextSibling as HTMLElement;
+      dragEl = target as HTMLElement;
+      parentEl = dragEl.parentNode;
+      nextEl = dragEl.nextSibling;
       lastDownEl = target;
       activeGroup = options.group as unknown as SortableGroup;
 
@@ -446,7 +446,7 @@ class Sortable {
       _this._lastX = (touch || evt).clientX;
       _this._lastY = (touch || evt).clientY;
 
-      dragEl.style['will-change'] = 'all';
+      dragEl!.style['will-change'] = 'all';
 
       dragStartFn = function () {
         if (Sortable.eventCanceled) {
@@ -995,12 +995,7 @@ class Sortable {
       evt.cancelable && evt.preventDefault();
     }
 
-    target = closest(
-      target as Element,
-      options.draggable!,
-      el,
-      true
-    ) as HTMLElement;
+    target = closest(target, options.draggable!, el, true) as HTMLElement;
 
     if (Sortable.eventCanceled) return completedFired;
 
@@ -1173,7 +1168,7 @@ class Sortable {
 
           do {
             dragIndex -= direction;
-            sibling = parentEl?.children[dragIndex];
+            sibling = parentEl?.children[dragIndex] as HTMLElement;
           } while (
             sibling &&
             (css(sibling, 'display') === 'none' || sibling === ghostEl)
@@ -1471,22 +1466,22 @@ class Sortable {
 
   sort(order: string[], useAnimation?: boolean) {
     let _this = Sortable.get(this),
-      items = {} as Record<string, HTMLElement>,
-      rootEl = this.el as HTMLElement;
+      items = {} as Record<string, Element>,
+      rootEl = this.el;
 
     _this.toArray().forEach(function (id: string | number, i: number) {
-      let el = rootEl.children[i];
+      let el = rootEl?.children[i];
 
-      if (closest(el, _this.options.draggable!, rootEl, false)) {
-        items[id] = el as HTMLElement;
+      if (closest(el!, _this.options.draggable!, rootEl!, false)) {
+        items[id] = el!;
       }
     }, _this);
 
     useAnimation && _this.captureAnimationState();
     order.forEach(function (id) {
       if (items[id]) {
-        rootEl.removeChild(items[id]);
-        rootEl.appendChild(items[id]);
+        rootEl?.removeChild(items[id]);
+        rootEl?.appendChild(items[id]);
       }
     });
     useAnimation && _this.animateAll?.();
