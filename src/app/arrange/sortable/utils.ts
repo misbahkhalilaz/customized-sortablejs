@@ -103,16 +103,16 @@ function css(
   el: HTMLElement | Element,
   prop?: keyof CSSStyleDeclaration,
   val?: CSSStyleDeclaration | string | number
-) {
-  let style = (el && el.style) as CSSStyleDeclaration;
+):
+  | CSSStyleDeclaration
+  | CSSStyleDeclaration[keyof CSSStyleDeclaration]
+  | undefined {
+  let style = el && el.style;
 
   if (style) {
     if (val === void 0) {
       if (document.defaultView && document.defaultView.getComputedStyle) {
-        val = document.defaultView.getComputedStyle(
-          el,
-          ''
-        ) as unknown as CSSStyleDeclaration;
+        val = document.defaultView.getComputedStyle(el, '');
       } else if ((el as HTMLElement).currentStyle) {
         val = (el as HTMLElement).currentStyle;
       }
