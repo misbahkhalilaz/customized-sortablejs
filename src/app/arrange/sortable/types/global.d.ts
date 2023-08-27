@@ -73,7 +73,3 @@ declare global {
 }
 
 export type Void = () => void;
-
-export enum CustomEvent {
-  POINTERDOWN = 'pointerdown',
-}
