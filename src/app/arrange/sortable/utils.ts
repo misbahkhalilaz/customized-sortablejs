@@ -556,16 +556,7 @@ function scrollBy(el: IHTMLElement, x: number, y: number) {
 }
 
 function clone(el: IHTMLElement) {
-  let Polymer = window.Polymer;
-  let $ = window.jQuery || window.Zepto;
-
-  if (Polymer && Polymer.dom) {
-    return Polymer.dom(el).cloneNode(true);
-  } else if ($) {
-    return $(el).clone(true)[0];
-  } else {
-    return el.cloneNode(true);
-  }
+  return el.cloneNode(true);
 }
 
 function setRect(el: IHTMLElement, rect: ICSSStyleDeclaration) {
