@@ -2,7 +2,12 @@ import { HTMLElement } from './override';
 import { Void } from './global';
 import Sortable from '../Sortable';
 import { closest, on, css } from '../utils';
-import { onMove } from '../helpers/sortable';
+import {
+  _cancelNextTick,
+  _detectDirection,
+  _nextTick,
+  onMove,
+} from '../helpers/sortable';
 
 export interface SortableOptions {
   onMove?: typeof onMove;
@@ -35,16 +40,16 @@ export interface SortableOptions {
   direction?: (evt: Event, target: EventTarget, dragEl: HTMLElement) => string;
   dragClass?: string;
   ghostClass?: string;
-  dragoverBubble?: any;
-  fallbackTolerance?: any;
-  fallbackOffset?: any;
-  fallbackOnBody?: any;
+  dragoverBubble?: boolean;
+  fallbackTolerance?: number;
+  fallbackOffset?: { x: number; y: number };
+  fallbackOnBody?: boolean;
   fallbackClass?: string;
   chosenClass?: string;
-  removeCloneOnHide?: any;
-  setData?: any;
+  removeCloneOnHide?: boolean;
+  setData?: (dataTransfer: DragEvent['dataTransfer'], dragEl: Element) => void;
   draggable?: string;
-  dropBubble?: any;
+  dropBubble?: boolean;
   group?: string | null;
 }
 
@@ -89,9 +94,9 @@ export interface SortableUtils {
   toggleClass: (el: HTMLElement, name: string, state: boolean) => void;
   clone: (el: HTMLElement) => number | void | Node;
   index: (el: HTMLElement, selector: string) => number;
-  nextTick: (fn: any) => ReturnType<typeof setTimeout>;
-  cancelNextTick: (id: any) => void;
-  detectDirection: (el: any, options: any) => 'vertical' | 'horizontal';
+  nextTick: typeof _nextTick;
+  cancelNextTick: typeof _cancelNextTick;
+  detectDirection: typeof _detectDirection;
   getChild: (
     el: HTMLElement,
     childNum: number,

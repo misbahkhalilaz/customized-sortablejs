@@ -1,6 +1,6 @@
 import { Edge } from '../BrowserInfo';
 import Sortable from '../Sortable';
-import { SortableGroup, SortableOptions, ToFnValueCB } from '../types';
+import { SortableGroup, SortableOptions, ToFnValueCB, Void } from '../types';
 import { css, expando, getChild, getRect, index, lastChild } from '../utils';
 
 const CSSFloatProperty = Edge ? 'cssFloat' : 'float';
@@ -232,7 +232,7 @@ export const _generateId = (
 
 export const _saveInputCheckedState = (
   root: HTMLElement,
-  savedInputChecked: any[]
+  savedInputChecked: HTMLInputElement[]
 ) => {
   savedInputChecked.length = 0;
 
@@ -245,13 +245,11 @@ export const _saveInputCheckedState = (
   }
 };
 
-export const _nextTick = (fn: { (): void; (): void; (): void; (): void }) => {
+export const _nextTick = (fn: Void) => {
   return setTimeout(fn, 0);
 };
 
-export const _cancelNextTick = (
-  id: string | number | ReturnType<typeof setTimeout> | undefined
-) => {
+export const _cancelNextTick = (id?: ReturnType<typeof setTimeout>) => {
   return clearTimeout(id);
 };
 
@@ -324,27 +322,13 @@ export const _detectDirection = (el: HTMLElement, options: SortableOptions) => {
 };
 
 export const _dragElInRowColumn = (
-  dragRect: {
-    left: any;
-    top: any;
-    right: any;
-    bottom: any;
-    width: any;
-    height: any;
-  },
-  targetRect: {
-    left: any;
-    top: any;
-    right: any;
-    bottom: any;
-    width: any;
-    height: any;
-  },
+  dragRect: Partial<CSSStyleDeclaration>,
+  targetRect: Partial<CSSStyleDeclaration>,
   vertical: boolean
 ) => {
   let dragElS1Opp = vertical ? dragRect.left : dragRect.top,
     dragElS2Opp = vertical ? dragRect.right : dragRect.bottom,
-    dragElOppLength = vertical ? dragRect.width : dragRect.height,
+    dragElOppLength = vertical ? dragRect.width! : dragRect.height!,
     targetS1Opp = vertical ? targetRect.left : targetRect.top,
     targetS2Opp = vertical ? targetRect.right : targetRect.bottom,
     targetOppLength = vertical ? targetRect.width : targetRect.height;
@@ -352,7 +336,8 @@ export const _dragElInRowColumn = (
   return (
     dragElS1Opp === targetS1Opp ||
     dragElS2Opp === targetS2Opp ||
-    dragElS1Opp + dragElOppLength / 2 === targetS1Opp + targetOppLength / 2
+    dragElS1Opp! + Number(dragElOppLength) / 2 ===
+      targetS1Opp! + Number(targetOppLength) / 2
   );
 };
 
@@ -494,12 +479,12 @@ export const nearestEmptyInsertDetectEvent = (
 };
 
 export const _checkOutsideTargetEl = (
-  evt: { target: any },
+  evt: Event,
   dragEl: HTMLElement | null
 ) => {
   if (dragEl) {
     (
       dragEl!.parentNode![expando as keyof ParentNode] as Sortable
-    )._isOutsideThisEl(evt.target);
+    )._isOutsideThisEl(evt.target as Node);
   }
 };

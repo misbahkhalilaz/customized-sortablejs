@@ -56,7 +56,7 @@ declare global {
   }
 
   interface HTMLElement {
-    animated: any;
+    animated: ReturnType<typeof setTimeout> | boolean;
     msMatchesSelector: (selector: string) => void;
     currentStyle: CSSStyleDeclaration;
     host: {

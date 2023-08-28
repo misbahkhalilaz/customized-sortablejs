@@ -9,7 +9,7 @@ const captureMode = {
 function on(
   el: HTMLElement | Document,
   event: string,
-  fn: ((evt: Event | TouchEvent | PointerEvent) => void) | Sortable
+  fn: EventListenerOrEventListenerObject | Sortable
 ) {
   el.addEventListener(event, fn, captureMode);
 }
@@ -17,7 +17,7 @@ function on(
 function off(
   el: HTMLElement | Document,
   event: string,
-  fn: Sortable | ((e: TouchEvent | PointerEvent | Event) => void)
+  fn: Sortable | EventListenerOrEventListenerObject
 ) {
   (el as HTMLElement).removeEventListener(event, fn, captureMode);
 }

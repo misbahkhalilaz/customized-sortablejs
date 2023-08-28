@@ -44,11 +44,11 @@ export default class AnimationStateManager {
         });
       },
 
-      addAnimationState: (state: any) => {
+      addAnimationState: (state: AnimationState) => {
         animationStates.push(state);
       },
 
-      removeAnimationState: (target: any) => {
+      removeAnimationState: (target: HTMLElement) => {
         animationStates.splice(indexOfObject(animationStates, { target }), 1);
       },
 
