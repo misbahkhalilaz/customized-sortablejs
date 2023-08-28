@@ -59,11 +59,11 @@ import {
 import { Void } from './types/global';
 
 let dragEl: HTMLElement | null,
-  parentEl: ParentNode | null,
+  parentEl: HTMLElement | null,
   ghostEl: HTMLElement | null,
   rootEl: HTMLElement | null,
   nextEl: ChildNode | null,
-  lastDownEl: Element | null,
+  lastDownEl: HTMLElement | null,
   cloneEl: HTMLElement | null,
   cloneHidden: boolean | null,
   oldIndex: number | null,
@@ -82,7 +82,7 @@ let dragEl: HTMLElement | null,
   tapDistanceLeft: number,
   tapDistanceTop: number,
   moved: boolean | null,
-  lastTarget: EventTarget | null,
+  lastTarget: HTMLElement | null,
   lastDirection: number | null,
   pastFirstInvertThresh = false,
   isCircumstantialInvert = false,
@@ -140,7 +140,7 @@ class Sortable {
   static version: number;
   static ghost: HTMLElement | null;
   static clone: HTMLElement | null;
-  static dragged: Element | null;
+  static dragged: HTMLElement | null;
   static eventCanceled: boolean;
   static supportPointer: boolean;
   static active: Sortable | null;
@@ -148,7 +148,7 @@ class Sortable {
 
   el: HTMLElement | null;
   options: SortableOptions;
-  _ignoreWhileAnimating: EventTarget | null;
+  _ignoreWhileAnimating: HTMLElement | null;
   defaults: SortableOptions;
   nativeDraggable: boolean;
   _lastX: number | undefined;
@@ -172,7 +172,7 @@ class Sortable {
     this._ignoreWhileAnimating = null;
 
     // Export instance
-    (el as unknown as Record<string, unknown>)[expando] = this;
+    (el as unknown as Record<string, Sortable>)[expando] = this;
 
     this.defaults = {
       group: null,
@@ -311,7 +311,7 @@ class Sortable {
     }
   }
 
-  _getDirection(evt: Event, target: EventTarget) {
+  _getDirection(evt: Event, target: HTMLElement) {
     return typeof this.options.direction === 'function'
       ? this.options.direction.call(this, evt, target, dragEl!)
       : this.options.direction;
@@ -389,7 +389,7 @@ class Sortable {
         .split(',')
         .some(function (criteria: string | HTMLElement | null) {
           criteria = closest(
-            originalTarget as HTMLElement,
+            originalTarget as Element,
             (criteria as string).trim(),
             el,
             false
@@ -431,7 +431,7 @@ class Sortable {
       let dragRect = getRect(target);
       rootEl = el;
       dragEl = target as HTMLElement;
-      parentEl = dragEl.parentNode;
+      parentEl = dragEl.parentNode as HTMLElement;
       nextEl = dragEl.nextSibling;
       lastDownEl = target;
       activeGroup = options.group as unknown as SortableGroup;
@@ -650,7 +650,7 @@ class Sortable {
       }
 
       (
-        dragEl?.parentNode?.[expando as keyof ParentNode] as Sortable
+        dragEl?.parentNode?.[expando as keyof ParentNode] as unknown as Sortable
       )?._isOutsideThisEl(target!);
 
       if (parent) {
@@ -822,7 +822,7 @@ class Sortable {
 
       Sortable.ghost = ghostEl;
 
-      container?.appendChild(ghostEl);
+      container?.appendChild(ghostEl as Node);
 
       // Set transform-origin
       css(
@@ -862,7 +862,7 @@ class Sortable {
       if (Sortable.eventCanceled) return;
 
       if (!this.options.removeCloneOnHide) {
-        rootEl!.insertBefore(cloneEl!, dragEl);
+        rootEl!.insertBefore(cloneEl as Node, dragEl as Node);
       }
       this._hideClone();
     };
@@ -883,7 +883,7 @@ class Sortable {
 
       if (dataTransfer) {
         dataTransfer.effectAllowed = 'move';
-        options.setData && options.setData.call(this, dataTransfer, dragEl!);
+        options.setData && options.setData.call(this, dataTransfer, dragEl);
       }
 
       on(document, 'drop', this);
@@ -991,7 +991,9 @@ class Sortable {
         target !== (document as unknown as HTMLElement)
       ) {
         (
-          dragEl?.parentNode?.[expando as keyof ParentNode] as Sortable
+          dragEl?.parentNode?.[
+            expando as keyof ParentNode
+          ] as unknown as Sortable
         )._isOutsideThisEl(evt.target as Node);
 
         // Do not detect for empty insert if already inserted
@@ -1055,9 +1057,9 @@ class Sortable {
 
         if (!Sortable.eventCanceled) {
           if (nextEl) {
-            rootEl?.insertBefore(dragEl!, nextEl);
+            rootEl?.insertBefore(dragEl as Node, nextEl);
           } else {
-            rootEl?.appendChild(dragEl!);
+            rootEl?.appendChild(dragEl as Node);
           }
         }
 
@@ -1101,9 +1103,9 @@ class Sortable {
           capture();
           if (elLastChild && elLastChild.nextSibling) {
             // the last draggable element is not the last node
-            el.insertBefore(dragEl!, elLastChild.nextSibling);
+            el.insertBefore(dragEl as Node, elLastChild.nextSibling);
           } else {
-            el.appendChild(dragEl!);
+            el.appendChild(dragEl as Node);
           }
           parentEl = el; // actualization
 
@@ -1132,7 +1134,7 @@ class Sortable {
           ) !== false
         ) {
           capture();
-          el.insertBefore(dragEl!, firstChild);
+          el.insertBefore(dragEl as Node, firstChild);
           parentEl = el; // actualization
 
           changed();
@@ -1228,11 +1230,11 @@ class Sortable {
           capture();
 
           if (after && !nextSibling) {
-            el.appendChild(dragEl!);
+            el.appendChild(dragEl as Node);
           } else {
             target?.parentNode?.insertBefore(
-              dragEl!,
-              after ? nextSibling! : target
+              dragEl as Node,
+              (after ? nextSibling! : target) as Node
             );
           }
 
@@ -1259,7 +1261,7 @@ class Sortable {
         }
       }
 
-      if (el.contains(dragEl)) {
+      if (el.contains(dragEl as Node)) {
         return completed(false);
       }
     }
@@ -1359,7 +1361,9 @@ class Sortable {
         !options.dropBubble && evt.stopPropagation();
       }
 
-      ghostEl && ghostEl.parentNode && ghostEl.parentNode.removeChild(ghostEl);
+      ghostEl &&
+        ghostEl.parentNode &&
+        ghostEl.parentNode.removeChild(ghostEl as Node);
 
       if (
         rootEl === parentEl ||
@@ -1368,7 +1372,7 @@ class Sortable {
         // Remove clone(s)
         cloneEl &&
           cloneEl.parentNode &&
-          cloneEl.parentNode.removeChild(cloneEl);
+          cloneEl.parentNode.removeChild(cloneEl as Node);
       }
 
       if (dragEl) {
@@ -1567,7 +1571,8 @@ class Sortable {
     let _this = Sortable.get(this),
       el = this.el;
 
-    (el as unknown as Record<string, unknown>)[expando] = null;
+    (el as unknown as Record<string, HTMLElement[keyof HTMLElement]>)[expando] =
+      null;
 
     off(
       el!,
@@ -1611,7 +1616,7 @@ class Sortable {
 
       css(cloneEl!, 'display', 'none');
       if (this.options.removeCloneOnHide && cloneEl!.parentNode) {
-        cloneEl!.parentNode.removeChild(cloneEl!);
+        cloneEl!.parentNode.removeChild(cloneEl as Node);
       }
       cloneHidden = true;
     }
@@ -1631,11 +1636,11 @@ class Sortable {
         dragEl!.parentNode == rootEl &&
         !(this.options.group as unknown as SortableGroup).revertClone
       ) {
-        rootEl?.insertBefore(cloneEl!, dragEl);
+        rootEl?.insertBefore(cloneEl as Node, dragEl as Node);
       } else if (nextEl) {
-        rootEl?.insertBefore(cloneEl!, nextEl);
+        rootEl?.insertBefore(cloneEl as Node, nextEl);
       } else {
-        rootEl?.appendChild(cloneEl!);
+        rootEl?.appendChild(cloneEl as Node);
       }
 
       if ((this.options.group as unknown as SortableGroup).revertClone) {
@@ -1663,7 +1668,7 @@ Sortable.utils = {
   css: css,
   find: find,
   is: function (el: HTMLElement, selector: string) {
-    return !!closest(el, selector, el, false);
+    return !!closest(el as Element, selector, el, false);
   },
   extend: extend,
   throttle: throttle,

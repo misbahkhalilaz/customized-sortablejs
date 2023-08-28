@@ -1,7 +1,7 @@
 import { HTMLElement } from './override';
 import { Void } from './global';
 import Sortable from '../Sortable';
-import { closest, on, css } from '../utils';
+import { closest, on, css, find } from '../utils';
 import {
   _cancelNextTick,
   _detectDirection,
@@ -23,7 +23,7 @@ export interface SortableOptions {
   invertedSwapThreshold?: number | null;
   ignore?: string;
   filter?:
-    | ((evt: Event, target: EventTarget, sortable: Sortable) => string)
+    | ((evt: Event, target: HTMLElement, sortable: Sortable) => string)
     | string
     | boolean
     | null;
@@ -37,7 +37,7 @@ export interface SortableOptions {
     get: (element: Sortable) => Sortable | string[];
     set: (element: Sortable) => void;
   } | null;
-  direction?: (evt: Event, target: EventTarget, dragEl: HTMLElement) => string;
+  direction?: (evt: Event, target: HTMLElement, dragEl: HTMLElement) => string;
   dragClass?: string;
   ghostClass?: string;
   dragoverBubble?: boolean;
@@ -47,7 +47,10 @@ export interface SortableOptions {
   fallbackClass?: string;
   chosenClass?: string;
   removeCloneOnHide?: boolean;
-  setData?: (dataTransfer: DragEvent['dataTransfer'], dragEl: Element) => void;
+  setData?: (
+    dataTransfer: DragEvent['dataTransfer'],
+    dragEl: HTMLElement
+  ) => void;
   draggable?: string;
   dropBubble?: boolean;
   group?: string | null;
@@ -55,7 +58,7 @@ export interface SortableOptions {
 
 export interface SortableGroup {
   name?: string;
-  revertClone?: unknown;
+  revertClone?: boolean;
   checkPull?: (
     _this: Sortable,
     activeSortable: Sortable,
@@ -76,11 +79,7 @@ export interface SortableUtils {
   on: typeof on;
   off: (el: HTMLElement, event: string, fn: Void) => void;
   css: ReturnType<css>;
-  find: (
-    ctx: HTMLElement,
-    tagName: string,
-    iterator: (el: Element, i: number) => void
-  ) => unknown[] | HTMLCollectionOf<Element>;
+  find: typeof find;
   is: (el: HTMLElement, selector: string) => boolean;
   extend: (
     dst: Record<string | number, unknown>,

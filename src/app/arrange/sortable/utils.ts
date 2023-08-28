@@ -54,7 +54,7 @@ function getParentOrHost(el: HTMLElement) {
 }
 
 function closest(
-  /**HTMLElement*/ el: Element,
+  /**HTMLElement*/ el: HTMLElement | Element,
   /**String*/ selector: string,
   /**HTMLElement*/ ctx: HTMLElement | Record<string, Sortable>,
   includeCTX: boolean
@@ -112,7 +112,7 @@ function css(
   if (style) {
     if (val === void 0) {
       if (document.defaultView && document.defaultView.getComputedStyle) {
-        val = document.defaultView.getComputedStyle(el, '');
+        val = document.defaultView.getComputedStyle(el as Element, '');
       } else if ((el as HTMLElement).currentStyle) {
         val = (el as HTMLElement).currentStyle;
       }
@@ -349,12 +349,7 @@ function getChild(
       children[i].style.display !== 'none' &&
       children[i] !== Sortable.ghost &&
       (includeDragEl || children[i] !== Sortable.dragged) &&
-      closest(
-        children[i] as HTMLElement,
-        options.draggable as string,
-        el,
-        false
-      )
+      closest(children[i], options.draggable as string, el, false)
     ) {
       if (currentChild === childNum) {
         return children[i];
@@ -395,7 +390,7 @@ function lastChild(el: HTMLElement, selector?: string) {
  * @param  {selector} selector
  * @return {number}
  */
-function index(el: Element, selector?: string) {
+function index(el: HTMLElement | Element, selector?: string) {
   let index = 0;
 
   if (!el || !el.parentNode) {

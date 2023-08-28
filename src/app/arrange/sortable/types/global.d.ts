@@ -5,8 +5,8 @@ declare global {
   var modifiedValue: SortableOptions[keyof SortableOptions] | undefined;
 
   interface Window {
-    CSSMatrix: string;
-    MSCSSMatrix: unknown;
+    CSSMatrix: CSSMatrixComponent;
+    MSCSSMatrix: CSSMatrixComponent;
   }
 
   interface Element {
@@ -19,10 +19,7 @@ declare global {
     pointerType?: string;
     path?: string | string[];
     button?: number;
-    dataTransfer: {
-      effectAllowed: string;
-      dropEffect: string;
-    };
+    dataTransfer: DragEvent['dataTransfer'];
     rootEl?: HTMLElement;
     to?: HTMLElement;
     from?: HTMLElement;
@@ -39,11 +36,11 @@ declare global {
 
   interface EventTarget {
     isContentEditable?: boolean;
-    dataTransfer?: unknown;
-    animated?: unknown;
-    animatingX?: unknown;
-    animatingY?: unknown;
-    toRect?: unknown;
+    dataTransfer?: DragEvent['dataTransfer'];
+    animated?: ReturnType<typeof setTimeout> | boolean;
+    animatingX?: boolean;
+    animatingY?: boolean;
+    toRect?: Partial<CSSStyleDeclaration>;
     nextElementSibling?: HTMLElement;
   }
 

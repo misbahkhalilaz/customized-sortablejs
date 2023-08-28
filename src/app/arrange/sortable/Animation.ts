@@ -143,8 +143,8 @@ export default class AnimationStateManager {
 
       animate: (
         target: HTMLElement,
-        currentRect: { left: number; top: number },
-        toRect: { left: number; top: number },
+        currentRect: Partial<CSSStyleDeclaration>,
+        toRect: Partial<CSSStyleDeclaration>,
         duration: string | number | undefined
       ) => {
         if (duration) {
@@ -153,8 +153,8 @@ export default class AnimationStateManager {
           let elMatrix = matrix(sortable.el!),
             scaleX = elMatrix && elMatrix.a,
             scaleY = elMatrix && elMatrix.d,
-            translateX = (currentRect.left - toRect.left) / (scaleX || 1),
-            translateY = (currentRect.top - toRect.top) / (scaleY || 1);
+            translateX = (Number(currentRect.left) - Number(toRect.left)) / (scaleX || 1),
+            translateY = (Number(currentRect.top) - Number(toRect.top)) / (scaleY || 1);
 
           target.animatingX = !!translateX;
           target.animatingY = !!translateY;

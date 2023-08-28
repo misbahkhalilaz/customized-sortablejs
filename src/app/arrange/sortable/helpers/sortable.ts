@@ -23,7 +23,7 @@ export const onMove = (
   willInsertAfter?: boolean
 ): boolean | number => {
   let evt,
-    sortable = fromEl![expando as keyof HTMLElement] as Sortable,
+    sortable = fromEl![expando as keyof HTMLElement] as unknown as Sortable,
     onMoveFn = sortable.options.onMove,
     retVal;
   // Support for new CustomEvent feature
@@ -198,7 +198,7 @@ export const _getInsertDirection = (
   target: HTMLElement,
   dragEl: HTMLElement
 ) => {
-  if (index(dragEl) < index(target)) {
+  if (index(dragEl as Element) < index(target as Element)) {
     return 1;
   } else {
     return -1;
@@ -354,8 +354,9 @@ export const _detectNearestEmptySortable = (
 ) => {
   let ret: HTMLElement | undefined;
   sortables.some((sortable: HTMLElement) => {
-    const threshold = (sortable[expando as keyof HTMLElement] as Sortable)
-      .options.emptyInsertThreshold;
+    const threshold = (
+      sortable[expando as keyof HTMLElement] as unknown as Sortable
+    ).options.emptyInsertThreshold;
     if (!threshold || lastChild(sortable)) return;
 
     const rect = getRect(sortable)!,
@@ -382,7 +383,7 @@ export const _prepareGroup = (options: SortableOptions) => {
       from: Sortable,
       dragEl: HTMLElement,
       evt: Event
-    ): unknown {
+    ): boolean | string {
       let sameGroup =
         (to.options.group as unknown as SortableGroup).name &&
         (from.options.group as unknown as SortableGroup).name &&
@@ -471,9 +472,9 @@ export const nearestEmptyInsertDetectEvent = (
       event['target'] = event['rootEl'] = nearest;
       event['preventDefault'] = void 0;
       event['stopPropagation'] = void 0;
-      (nearest[expando as keyof HTMLElement] as Sortable)?._onDragOver(
-        event as unknown as Event
-      );
+      (
+        nearest[expando as keyof HTMLElement] as unknown as Sortable
+      )?._onDragOver(event as unknown as Event);
     }
   }
 };
@@ -484,7 +485,7 @@ export const _checkOutsideTargetEl = (
 ) => {
   if (dragEl) {
     (
-      dragEl!.parentNode![expando as keyof ParentNode] as Sortable
+      dragEl!.parentNode![expando as keyof ParentNode] as unknown as Sortable
     )._isOutsideThisEl(evt.target as Node);
   }
 };
